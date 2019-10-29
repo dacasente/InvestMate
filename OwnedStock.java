@@ -6,12 +6,13 @@ public class OwnedStock{
   public String ticker;
   public int shares;
   public Date purchased;
+  public float purchasePrice;
   
-  public OwnedStock(String name, String ticker, int shares, Date purchased){
+  public OwnedStock(String name, String ticker, int shares){
     this.name = name;
     this.ticker = ticker;
     this.shares = shares;
-    this.purchased = purchased;
+    this.purchasePrice = StockImporter.getCurrentPrice(ticker);
   }
   
   public String getName(){

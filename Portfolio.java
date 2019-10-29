@@ -8,7 +8,7 @@ public class Portfolio{
   public Portfolio(String[] stockNames, String[] ticker, int[] stockAmounts, Date[] datePurchased){
     portfolio = new ArrayList<OwnedStock>();
     for(int i=0; i < stockNames.length; i++){
-      OwnedStock temp = new OwnedStock(stockNames[i], ticker[i], stockAmounts[i], datePurchased[i]);
+      OwnedStock temp = new OwnedStock(stockNames[i],ticker[i], stockAmounts[i]);
       portfolio.add(temp);
     }
   }
@@ -33,9 +33,9 @@ public class Portfolio{
     return searched;
   }
   
-  public void buyStock(String name, String ticker, int amount, Date date){
-    OwnedStock temp = new OwnedStock(name, ticker, amount, date);
-    portfolio.add(temp);
+  public void buyStock(String name, String ticker, int amount, float purchasedPrice){
+    OwnedStock temp = new OwnedStock(name, ticker, amount);
+    
     
   }
   
