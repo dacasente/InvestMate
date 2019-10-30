@@ -21,37 +21,43 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import javafx.application.Application; 
 import javafx.scene.Group; 
 import javafx.scene.Scene; 
-import javafx.stage.Stage; 
 import javafx.scene.shape.Rectangle; 
 
 @SuppressWarnings("restriction")
-public class UserInterface extends Application {
-	
-	// Get these to be updated every time there is a resize
+public class RunInvestMate extends Application {
 	
 	int InitialHeightScreen = 728, InitialWidthScreen = 1200;
-	// Might not need this but could help with resize listener
-	double CurrentHeightScreen = InitialHeightScreen, CurrentWidthScreen = InitialWidthScreen;
 	int StocksInPorfolio = 0;
 	int TimesinStartScene = 0, TimesinPersonalInfoScene = 0, TimeinOnboardScene = 0, TimesinMainScene = 0;
-	
-	// Get a better way of doing this but right now its good (User Class)
-	ComboBox <Integer> AgeSelection;
 	
 	// All the Objects in the Program
 	Stage window;
 	
-	// Global Variables for the Onboard Scene
-	List<String> NamesStock = new ArrayList<String> ();
+	//Classes that the program is pulling and storing information in
+	User person;
+	OwnedStock stocks;
+	Portfolio portfolio;
+	
+	// Global Variables for Personal Information Page
+	ComboBox <Integer> AgeSelection;
+	TextArea NameBox;
+	
+	// Global Information for Addstock Method
+	ArrayList<ComboBox <String>> NameStock = new ArrayList <ComboBox <String>> ();
+	ArrayList<ComboBox <Integer>> AmountQuantity = new ArrayList <ComboBox <Integer>> ();
+	ArrayList<ComboBox <String>> DayBought = new ArrayList <ComboBox <String>> ();
+	ArrayList<ComboBox <String>> MonthBought = new ArrayList <ComboBox <String>> ();
+	ArrayList<ComboBox <String>> YearBought = new ArrayList <ComboBox <String>> ();
+	Button AddButton = new Button("Add");
 	
 	// The different Scenes
 	Scene StartScene, PersonalInfoScene, OnBoardScene, MainScene;
-	Button AddButton = new Button("Add");
 	// This is going to correlate with the number of pages
 	Group root1 = new Group(), root2 = new Group(), root3 = new Group(), root4 = new Group();
+	StackPane root4Pane = new StackPane();
+	
 	// All the images
 	Image StartImage = new Image("File:StartScreen.jpeg");
 	ImageView Startimg = new ImageView(StartImage); 
@@ -79,6 +85,12 @@ public class UserInterface extends Application {
 		    "-fx-font-family: Courier New;"+
 		    "-fx-font-weight: bold;"+
 		    "-fx-font-size: 25;"+
+		    "-fx-stroke: white";
+	
+	String MainPageStockTextStyle = "-fx-font: Courier New;"+
+		    "-fx-font-family: Courier New;"+
+		    "-fx-font-weight: bold;"+
+		    "-fx-font-size: 20;"+
 		    "-fx-stroke: white";
 	
 	String ErrorTextStyle = "-fx-font: Courier New;"+
@@ -144,9 +156,9 @@ public class UserInterface extends Application {
 		
 		// Page Header
 		Text PersonalInfo = new Text("Personal Info");
-		PersonalInfo.setLayoutX(CurrentWidthScreen/2 - 175);
 		PersonalInfo.setLayoutY(50);
 		PersonalInfo.setStyle(HeaderTextStyle);
+		PersonalInfo.setLayoutX(InitialWidthScreen/2 - 2*PersonalInfo.getLayoutBounds().getWidth());
 		
 		// Back Button
 		int backButtonSizeX = 100,backButtonSizeY = 45,BackButtonPositionX = 5, BackButtonPositiony  = 5;
@@ -176,7 +188,7 @@ public class UserInterface extends Application {
 		
 		// TextBox for Amount of Stocks	
 		int NameBoxPositionX = 550, NameBoxPositionY = 170, NameBoxSizeX = 200, NameBoxSizeY = 50;
-		TextArea NameBox = new TextArea();
+		NameBox = new TextArea();
 		NameBox.setLayoutX(NameBoxPositionX);
 		NameBox.setLayoutY(NameBoxPositionY);
 		NameBox.setPrefSize(NameBoxSizeX, NameBoxSizeY);
@@ -200,15 +212,17 @@ public class UserInterface extends Application {
 		AgeSelection.setValue(1);
 		
 		root2.getChildren().addAll(PersonalInfo,back,Continue, NamePrompt, NameBox, AgePrompt, AgeSelection);
+		//root2.setAlignment(Pos.Center);
 		if (TimesinPersonalInfoScene == 1)
-			PersonalInfoScene = new Scene(root2, CurrentWidthScreen, CurrentHeightScreen);
+			PersonalInfoScene = new Scene(root2, InitialWidthScreen, InitialHeightScreen);
 		window.setScene(PersonalInfoScene);
 	}
 	
 	public void CheckAge() {
+		person = new User(NameBox.getText(),AgeSelection.getValue());
 		Text PersonalInfo = new Text("you must be at least 18 years or older to use this program");
 		// Get user Age
-		if (AgeSelection.getValue() >= 18) {
+		if (person.getAge() >= 18) {
 			root2.getChildren().remove(PersonalInfo);
 			LoadOnboardPage();
 		}
@@ -225,7 +239,7 @@ public class UserInterface extends Application {
 		
 		// Onboard Text
 		Text Onboard = new Text("Onboard Portfolio");
-		Onboard.setLayoutX(CurrentWidthScreen/2 - 200);
+		Onboard.setLayoutX(InitialWidthScreen/2 - 200);
 		Onboard.setLayoutY(50);
 		Onboard.setStyle(HeaderTextStyle);
 		
@@ -251,7 +265,7 @@ public class UserInterface extends Application {
 		
 		root3.getChildren().addAll(Onboard, back, Continue);
 		if (TimeinOnboardScene == 1)
-			OnBoardScene = new Scene(root3, CurrentWidthScreen, CurrentHeightScreen);
+			OnBoardScene = new Scene(root3, InitialWidthScreen, InitialHeightScreen);
 		window.setScene(OnBoardScene);
 	}
 	
@@ -280,15 +294,15 @@ public class UserInterface extends Application {
 		
 		// Stock Searcher
 		int StocksNamesPositionX = 45, StocksNamesPositionY = (100 + 80*(StocksInPorfolio-1));
-		ComboBox <String> StocksNames;
-		StocksNames = new ComboBox<String>();
+		ComboBox <String> StocksNames = new ComboBox<String>();
+		NameStock.add(StocksNames);
 		// Add all the Stock Names
-		StocksNames.getItems().addAll("Select a Stock","2","3","4","5","6","7");
+		StocksNames.getItems().addAll("select a stock","msft - Microsoft","aapl - Aaple","T - AT&T","vz - Verizon","ms - Morgan Stanley","amd - advanced micro devices");
 		StocksNames.setLayoutX(StocksNamesPositionX);
 		StocksNames.setLayoutY(StocksNamesPositionY);
 		StocksNames.setValue("Select a Stock");
 		
-		// Name Text Parameters
+		// Quantity Text Parameters
 		int QuantityTextPositionX = 350, QuantityTextPositionY = (85 + 80*(StocksInPorfolio-1));
 		Text QuantityText = new Text("Amount Purchased");
 		QuantityText.setLayoutX(QuantityTextPositionX);
@@ -297,19 +311,75 @@ public class UserInterface extends Application {
 		QuantityText.toFront();
 		
 		// TextBox for Amount of Stocks	
-		int QuantityBoxPositionX = 350, QuantityBoxPositionY = (100 + 80*(StocksInPorfolio-1)), QuantityBoxSizeX = 150, QuantityBoxSizeY = 15;
-		TextArea QuantityBox = new TextArea();
+		int QuantityBoxPositionX = 350, QuantityBoxPositionY = (100 + 80*(StocksInPorfolio-1));
+		ComboBox <Integer> QuantityBox = new ComboBox<Integer>();
+		AmountQuantity.add(QuantityBox);
+		for (int j = 1; j <= 1000 ; j++) {
+			QuantityBox.getItems().add(j);
+		}
 		QuantityBox.setLayoutX(QuantityBoxPositionX);
 		QuantityBox.setLayoutY(QuantityBoxPositionY);
-		QuantityBox.setPrefSize(QuantityBoxSizeX, QuantityBoxSizeY);
+		QuantityBox.setValue(1);
 		
-		// Name Text Parameters
+		// Date Text Parameters
 		int DatePurchasedTextPositionX = 700, DatePurchasedTextPositionY = (85 + 80*(StocksInPorfolio-1));
 		Text DatePurchasedText = new Text("Date Purchased");
 		DatePurchasedText.setLayoutX(DatePurchasedTextPositionX);
 		DatePurchasedText.setLayoutY(DatePurchasedTextPositionY);
 		DatePurchasedText.setStyle(StockTextStyle);
 		DatePurchasedText.toFront();
+		
+		//Delete Stock Button
+		int DeleteButtonSizeX = 25,DeleteButtonSizeY = 25,DeleteButtonPositionX = 1100, DeleteButtonPositiony  = (85 + 80*(StocksInPorfolio-1));
+		Button Delete = new Button("x");
+		Delete.setStyle(BaseStartButtonStyle);
+		Delete.setPrefSize(DeleteButtonSizeX, DeleteButtonSizeY);
+		Delete.setLayoutX(DeleteButtonPositionX);
+		Delete.setLayoutY(DeleteButtonPositiony);
+		HoverListener(Delete,BaseStartButtonStyle,HoverStartButtonStyle);
+		//Delete.setOnAction(e -> window.setScene(PersonalInfoScene));
+		
+		// Month
+		int MonthPositionX = 700, MonthPositionY = (100 + 80*(StocksInPorfolio-1));
+		ComboBox <String> Month = new ComboBox<String>();
+		MonthBought.add(Month);
+		Month.getItems().addAll("01","02","03","04","05","06","07","08","09","10","11","12");
+		Month.setLayoutX(MonthPositionX);
+		Month.setLayoutY(MonthPositionY);
+		Month.setValue("01");
+		
+		// Day
+		int DayPositionX = 800, DayPositionY = (100 + 80*(StocksInPorfolio-1));
+		ComboBox <String> Day = new ComboBox<String>();
+		DayBought.add(Day);
+		for (int j = 1; j <= 31 ; j++) {
+			String k;
+			if (j < 10)
+				k = "0"+j;
+			else 
+				k = "" + j;
+			Day.getItems().add(k);
+		}
+		Day.setLayoutX(DayPositionX);
+		Day.setLayoutY(DayPositionY);
+		Day.setValue("01");
+		
+		// Year
+		int YearPositionX = 900, YearPositionY = (100 + 80*(StocksInPorfolio-1));
+		ComboBox <String> Year = new ComboBox<String>();
+		YearBought.add(Year);
+		// Add all the Stock Names
+		for (int k = 00; k <= 19 ; k++) {
+			String j;
+			if (k < 10)
+				j = "0"+k;
+			else 
+				j = "" + k;
+			Year.getItems().add(j);
+		}
+		Year.setLayoutX(YearPositionX);
+		Year.setLayoutY(YearPositionY);
+		Year.setValue("00");
 		
 		// Remove Previous button
 		if (StocksInPorfolio > 1) {
@@ -325,19 +395,126 @@ public class UserInterface extends Application {
 		HoverListener(AddButton,BaseAddButtonStyle,HoverAddButtonStyle);
 		AddButton.setOnAction(e -> AddAnotherStock());
 		
-		root3.getChildren().addAll(rectangle,AddButton, NameText, QuantityText, DatePurchasedText, StocksNames, QuantityBox);
+		root3.getChildren().addAll(rectangle,AddButton, NameText, QuantityText, DatePurchasedText, StocksNames, QuantityBox, Day, Month, Year, Delete);
 
+	}
+	
+	public void ReloadOnboardPage() {
+		
+	}
+	
+	// Make it check everything is correct before making the portfolio
+	public void CheckStocks() {
+		ArrayList<OwnedStock> Portfolio = new ArrayList<OwnedStock>();
+		for (int i = 0; i < NameStock.size(); i++) {
+			String date = MonthBought.get(i).getValue() + "/" + DayBought.get(i).getValue() + "/" + YearBought.get(i).getValue();
+			OwnedStock stocks = new OwnedStock("",NameStock.get(i).getValue(),AmountQuantity.get(i).getValue(), date);
+			Portfolio.add(stocks);
+		}
+		portfolio = new Portfolio(Portfolio);
+		
 	}
 	
 	public void LoadMainPage() {
 		TimesinMainScene++;
 		
-		root4.getChildren().addAll();
+		Text BlanksPortfolio = new Text(person.getName()+"'s Portfolio");
+		BlanksPortfolio.setLayoutY(50);
+		BlanksPortfolio.setLayoutX(InitialWidthScreen/2 - 200);
+		BlanksPortfolio.setStyle(HeaderTextStyle);
+		
+		int EditPortFolioButtonSizeX = 250,EditPortFolioButtonSizeY = 45,EditPortFolioButtonPositionX = 5, EditPortFolioButtonPositiony  = 5;
+		Button EditPortFolio = new Button("Edit Portfolio");
+		EditPortFolio.setStyle(BaseStartButtonStyle);
+		EditPortFolio.setPrefSize(EditPortFolioButtonSizeX, EditPortFolioButtonSizeY);
+		EditPortFolio.setLayoutX(EditPortFolioButtonPositionX);
+		EditPortFolio.setLayoutY(EditPortFolioButtonPositiony);
+		HoverListener(EditPortFolio,BaseStartButtonStyle,HoverStartButtonStyle);
+		EditPortFolio.setOnAction(e -> UnloadCurrentScene(OnBoardScene, root4));
+		
+		int EditPersonalButtonSizeX = 250,EditPersonalButtonSizeY = 45,EditPersonalButtonPositionX = ((InitialWidthScreen - 5) - EditPersonalButtonSizeX), EditPersonalButtonPositiony  = 5;
+		Button EditPersonal = new Button("Edit Personal Info");
+		EditPersonal.setStyle(BaseStartButtonStyle);
+		EditPersonal.setPrefSize(EditPersonalButtonSizeX, EditPersonalButtonSizeY);
+		EditPersonal.setLayoutX(EditPersonalButtonPositionX);
+		EditPersonal.setLayoutY(EditPersonalButtonPositiony);
+		HoverListener(EditPersonal,BaseStartButtonStyle,HoverStartButtonStyle);
+		// remove name text and current stocks if this is pressed
+		EditPersonal.setOnAction(e -> UnloadCurrentScene(PersonalInfoScene, root4));
+		
+		// Change to stocks in portfolio if changing scenes
+		for (int i = 0; i < NameStock.size(); i++) {
+			// Rectangle Parameters
+			int RectangleSizeX = 1150,RectangleSizeY = 75,RectanglePositionX = 25, RectanglePositionY  = (60 + 80*i);		
+			Rectangle rectangle = new Rectangle();
+			rectangle.setWidth(RectangleSizeX); 
+			rectangle.setHeight(RectangleSizeY);
+			rectangle.setX(RectanglePositionX); 
+			rectangle.setY(RectanglePositionY);  
+			rectangle.setArcWidth(30.0); 
+			rectangle.setArcHeight(20.0);
+			rectangle.toBack();
+			
+			// Change to get this from the user class and not straight referencing it
+			// Stock Name
+			int NameTextPositionX = 45, NameTextPositionY = (95 + 80*i);
+			Text NameText = new Text("Name: "+NameStock.get(i).getValue());
+			NameText.setLayoutX(NameTextPositionX);
+			NameText.setLayoutY(NameTextPositionY);
+			NameText.setStyle(MainPageStockTextStyle);
+			NameText.toFront();
+			
+			// Change to get this from the user class and not straight referencing it
+			// Quantity Text Parameters
+			int QuantityTextPositionX = 350, QuantityTextPositionY = (95 + 80*i);
+			Text QuantityText = new Text("Quantity Purchased: "+AmountQuantity.get(i).getValue());
+			QuantityText.setLayoutX(QuantityTextPositionX);
+			QuantityText.setLayoutY(QuantityTextPositionY);
+			QuantityText.setStyle(MainPageStockTextStyle);
+			QuantityText.toFront();
+			
+			// Date Text Parameters
+			int DatePurchasedTextPositionX = 700, DatePurchasedTextPositionY = (95 + 80*i);
+			Text DatePurchasedText = new Text("Date Purchased: "+MonthBought.get(i).getValue()+"/"+DayBought.get(i).getValue()+"/"+YearBought.get(i).getValue());
+			DatePurchasedText.setLayoutX(DatePurchasedTextPositionX);
+			DatePurchasedText.setLayoutY(DatePurchasedTextPositionY);
+			DatePurchasedText.setStyle(MainPageStockTextStyle);
+			DatePurchasedText.toFront();
+			
+			root4.getChildren().addAll(rectangle,NameText,QuantityText,DatePurchasedText);
+		}
+		
+		int SaveButtonSizeX = 150,SaveButtonSizeY = 50,SaveButtonPositionX = 25, SaveButtonPositiony  = (60 + 80*StocksInPorfolio);
+		Button Save = new Button("Save Portfolio");
+		Save.setStyle(BaseStartButtonStyle);
+		Save.setPrefSize(SaveButtonSizeX, SaveButtonSizeY);
+		Save.setLayoutX(SaveButtonPositionX);
+		Save.setLayoutY(SaveButtonPositiony);
+		HoverListener(Save,BaseStartButtonStyle,HoverStartButtonStyle);
+		Save.setOnAction(e -> SavePortfolio());
+		
+		root4.getChildren().addAll(BlanksPortfolio,EditPortFolio,EditPersonal,Save);
 		if (TimesinMainScene == 1)
-			MainScene = new Scene(root4, CurrentWidthScreen, CurrentHeightScreen);
+			MainScene = new Scene(root4, InitialWidthScreen, InitialHeightScreen);
 		window.setScene(MainScene);
+		
+		for (int i = 0; i < NameStock.size(); i++) {
+			System.out.println("Stock: "+NameStock.get(i).getValue() + " Quantity: "+AmountQuantity.get(i).getValue()+" Date: "+MonthBought.get(i).getValue()+"/"+DayBought.get(i).getValue()+"/"+YearBought.get(i).getValue());
+		}
 	}
 
+	public void SavePortfolio () {
+		if (person.savePortfolio())
+			System.out.print("Saved");
+		else 
+			System.out.print("Not Saved");
+	}
+	
+	public void UnloadCurrentScene(Scene scene, Group root) {
+		root.getChildren().clear();
+		window.setScene(scene);
+	}
+	
 	public void HoverListener(Button button, String BaseStyle, String HoverStyle) {
 		button.hoverProperty().addListener((observable, oldValue, newValue) -> {
 			if (newValue) {
@@ -347,24 +524,4 @@ public class UserInterface extends Application {
 			}
 		});
 	}
-	
-	// Figure out how to implement a resize listener
-	public void ResizeListener(Stage window) {
-		this.window.widthProperty().addListener((obs, oldVal, newVal) -> {
-		     // Do whatever you want
-		});
-
-		this.window.heightProperty().addListener((obs, oldVal, newVal) -> {
-		     // Do whatever you want
-		});
-	}
-	
-	public void setCurrentWidth() {
-		CurrentHeightScreen = window.getHeight();
-	}
-	
-	public void setCurrentHeight() {
-		CurrentWidthScreen = window.getWidth();
-	}
 }
-
