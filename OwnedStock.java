@@ -1,4 +1,5 @@
 import java.util.*;
+import java.text.*;
 
 
 public class OwnedStock{
@@ -7,11 +8,12 @@ public class OwnedStock{
   public int shares;
   public Date purchased;
   
-  public OwnedStock(String name, String ticker, int shares, Date purchased){
+  public OwnedStock(String name, String ticker, int shares, String purchased){
+    Date date = OwnedStock.convertDate(purchased);
     this.name = name;
     this.ticker = ticker;
     this.shares = shares;
-    this.purchased = purchased;
+    this.purchased = date;
   }
   
   public String getName(){
@@ -58,5 +60,15 @@ public class OwnedStock{
     this.purchased = purchased;
   }
   
+  
+  public static Date convertDate(String date){
+    SimpleDateFormat format = new SimpleDateFormat("MM/dd/yy");
+    try{
+      return format.parse(date); 
+    }
+    catch(ParseException e){
+      return null;
+    }
+  }
   
 }
