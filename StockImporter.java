@@ -9,45 +9,131 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class StockImporter {
-	
-	public static float getCurrentPrice(String symbol){
-		//Using a StringBuilder...
-		StringBuilder urlBuilder = new StringBuilder();
-		//We specify our url...
-		urlBuilder.append("https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=");
-		//We define our stock that we'd like to recieve data for...
-		urlBuilder.append(symbol);
-		urlBuilder.append("&apikey=7X34UXTUDREKB4IK&datatype=csv");
+ 
+ public static float getCurrentPrice(String symbol){
+  //Using a StringBuilder...
+  StringBuilder urlBuilder = new StringBuilder();
+  //We specify our url...
+  urlBuilder.append("https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=");
+  //We define our stock that we'd like to recieve data for...
+  urlBuilder.append(symbol);
+  urlBuilder.append("&apikey=7X34UXTUDREKB4IK&datatype=csv");
 
-		try {
-			//We try to connect to our url...
-			URL url = new URL(urlBuilder.toString());
-			URLConnection urlConn = url.openConnection();
-			//and instantiate an inputstream to read from the URL...
-			InputStreamReader inStream = new InputStreamReader(urlConn.getInputStream());
-			BufferedReader buff = new BufferedReader(inStream);
-			buff.readLine();
-			String line = buff.readLine();
-			while (line != null){
-				String [] data = line.split(",");
-				return (Float.parseFloat(data[4]));
-			}
-		}
+  try {
+   //We try to connect to our url...
+   URL url = new URL(urlBuilder.toString());
+   URLConnection urlConn = url.openConnection();
+   //and instantiate an inputstream to read from the URL...
+   InputStreamReader inStream = new InputStreamReader(urlConn.getInputStream());
+   BufferedReader buff = new BufferedReader(inStream);
+   buff.readLine();
+   String line = buff.readLine();
+   while (line != null){
+    String [] data = line.split(",");
+    return (Float.parseFloat(data[4]));
+   }
+  }
 
-		catch (MalformedURLException mu){
-			System.out.println(mu.getMessage());
-			return 0;
-		}
-		catch (IOException io){
-			System.out.println(io.getMessage());
-			return 0;
-		}
-		catch(ArrayIndexOutOfBoundsException ae){
-			System.out.println("INVALID STOCK SYMBOL");
-			return 0;
-		}
-		return (0);
-	}
+  catch (MalformedURLException mu){
+   System.out.println(mu.getMessage());
+   return 0;
+  }
+  catch (IOException io){
+   System.out.println(io.getMessage());
+   return 0;
+  }
+  catch(ArrayIndexOutOfBoundsException ae){
+   System.out.println("INVALID STOCK SYMBOL");
+   return 0;
+  }
+  return (0);
+ }
+ 
+ public static String[] getStockInfo(String symbol){ //This method takes in a stock's name or symbol and returns info about the stock with the closest match
+  //Using a StringBuilder...
+  StringBuilder urlBuilder = new StringBuilder();
+  //We specify our url...
+  urlBuilder.append("https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=");
+  //We define our stock that we'd like to recieve data for...
+  urlBuilder.append(symbol);
+  urlBuilder.append("&apikey=7X34UXTUDREKB4IK&datatype=csv");
 
+  try {
+   //We try to connect to our url...
+   URL url = new URL(urlBuilder.toString());
+   URLConnection urlConn = url.openConnection();
+   //and instantiate an inputstream to read from the URL...
+   InputStreamReader inStream = new InputStreamReader(urlConn.getInputStream());
+   BufferedReader buff = new BufferedReader(inStream);
+   buff.readLine();
+   String line = buff.readLine();
+   if (line!=null){
+   String [] data = line.split(",");
+   return data;
+   }
+   else{
+     return null;
+   }
+  }
 
+  catch (MalformedURLException mu){ 
+   System.out.println(mu.getMessage());
+   return null;
+  }
+  catch (IOException io){
+   System.out.println(io.getMessage());
+   return null;
+  }
+  catch(ArrayIndexOutOfBoundsException ae){
+   System.out.println("INVALID STOCK SYMBOL");
+   return (null);
+  }
+ }
+
+ public static String getStockSymbol(String keyword){ //Uses getStockInfo to return the symbol of a stock when given other information about it (ie it's name)
+   String[] output = getStockInfo(keyword);
+   if (output!=null){
+     return getStockInfo(keyword)[0];
+   }else{
+     return null;
+   } 
+ }
+
+ public static String getStockName(String keyword){ //Uses getStockInfo to return the name of a stock when given other information about it (ie it's symbol)
+   String[] output = getStockInfo(keyword);
+   if (output!=null){
+     return getStockInfo(keyword)[1];
+   }else{
+     return null;
+   } 
+ }
+ 
+ public static String getStockType(String keyword){ //Uses getStockInfo to return the type (equity,etc.) of a stock when given other information about it (ie it's name)
+   String[] output = getStockInfo(keyword);
+   if (output!=null){
+     return getStockInfo(keyword)[2];
+   }else{
+     return null;
+   } 
+ }
+ 
+ public static String getStockLocale(String keyword){ //Uses getStockInfo to return the locale of the market that a stock is in when given other information about it (ie it's name)
+   String[] output = getStockInfo(keyword);
+   if (output!=null){
+     return getStockInfo(keyword)[3];
+   }else{
+     return null;
+   } 
+ }
+ 
+ public static String getStockCurrency(String keyword){ //Uses getStockInfo to return the native currency of the locale of a stock when given other information about it (ie it's name)
+   String[] output = getStockInfo(keyword);
+   if (output!=null){
+     return getStockInfo(keyword)[7];
+   }else{
+     return null;
+   } 
+ }
+ 
+ 
 }
