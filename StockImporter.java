@@ -89,6 +89,48 @@ public class StockImporter {
    return (null);
   }
  }
+ 
+  public static ArrayList<String> getStockList(String symbol){ //This method takes in a stock's name or symbol and returns info about the stock with the closest match
+  //Using a StringBuilder...
+  StringBuilder urlBuilder = new StringBuilder();
+  //We specify our url...
+  urlBuilder.append("https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=");
+  //We define our stock that we'd like to recieve data for...
+  urlBuilder.append(symbol);
+  urlBuilder.append("&apikey=7X34UXTUDREKB4IK&datatype=csv");
+  
+  ArrayList<String> output = new ArrayList<String>();
+  try {
+   //We try to connect to our url...
+   URL url = new URL(urlBuilder.toString());
+   URLConnection urlConn = url.openConnection();
+   //and instantiate an inputstream to read from the URL...
+   InputStreamReader inStream = new InputStreamReader(urlConn.getInputStream());
+   BufferedReader buff = new BufferedReader(inStream);
+   buff.readLine();
+   String line = buff.readLine();
+   while (line != null){
+     String[] data = line.split(",");
+     output.add(data[0] + ": " + data[1]);
+     line = buff.readLine();
+   }
+  }
+  catch (MalformedURLException mu){ 
+   System.out.println(mu.getMessage());
+   return null;
+  }
+  catch (IOException io){
+   System.out.println(io.getMessage());
+   return null;
+  }
+  catch(ArrayIndexOutOfBoundsException ae){
+   System.out.println("INVALID STOCK SYMBOL");
+   return (null);
+  }
+  return output;
+ }
+ 
+ 
 
  public static String getStockSymbol(String keyword){ //Uses getStockInfo to return the symbol of a stock when given other information about it (ie it's name)
    String[] output = getStockInfo(keyword);
