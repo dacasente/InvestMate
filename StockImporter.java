@@ -111,7 +111,7 @@ public class StockImporter {
    String line = buff.readLine();
    while (line != null){
      String[] data = line.split(",");
-     output.add(data[0] + ": " + data[1]);
+     output.add(data[1]);
      line = buff.readLine();
    }
   }
