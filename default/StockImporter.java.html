@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StockImporter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Coverage Summary</a> &gt; <a href="index.source.html" class="el_package">default</a> &gt; <span class="el_source">StockImporter.java</span></div><h1>StockImporter.java</h1><pre class="source lang-java linenums">
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.lang.StringBuilder;
+import java.util.ArrayList;
+import java.util.Date;
+
+<span class="nc" id="L12">public class StockImporter {</span>
+ 
+ public static float getCurrentPrice(String symbol){
+  //Using a StringBuilder...
+<span class="fc" id="L16">  StringBuilder urlBuilder = new StringBuilder();</span>
+  //We specify our url...
+<span class="fc" id="L18">  urlBuilder.append(&quot;https://www.alphavantage.co/query?function=GLOBAL_QUOTE&amp;symbol=&quot;);</span>
+  //We define our stock that we'd like to recieve data for...
+<span class="fc" id="L20">  urlBuilder.append(symbol);</span>
+<span class="fc" id="L21">  urlBuilder.append(&quot;&amp;apikey=7X34UXTUDREKB4IK&amp;datatype=csv&quot;);</span>
+
+  try {
+   //We try to connect to our url...
+<span class="fc" id="L25">   URL url = new URL(urlBuilder.toString());</span>
+<span class="fc" id="L26">   URLConnection urlConn = url.openConnection();</span>
+   //and instantiate an inputstream to read from the URL...
+<span class="fc" id="L28">   InputStreamReader inStream = new InputStreamReader(urlConn.getInputStream());</span>
+<span class="fc" id="L29">   BufferedReader buff = new BufferedReader(inStream);</span>
+<span class="fc" id="L30">   buff.readLine();</span>
+<span class="fc" id="L31">   String line = buff.readLine();</span>
+<span class="pc bpc" id="L32" title="1 of 2 branches missed.">   while (line != null){</span>
+<span class="fc" id="L33">    String [] data = line.split(&quot;,&quot;);</span>
+<span class="fc" id="L34">    return (Float.parseFloat(data[4]));</span>
+   }
+  }
+
+<span class="nc" id="L38">  catch (MalformedURLException mu){</span>
+<span class="nc" id="L39">   System.out.println(mu.getMessage());</span>
+<span class="nc" id="L40">   return 0;</span>
+  }
+<span class="fc" id="L42">  catch (IOException io){</span>
+<span class="fc" id="L43">   System.out.println(io.getMessage());</span>
+<span class="fc" id="L44">   return 0;</span>
+  }
+<span class="nc" id="L46">  catch(ArrayIndexOutOfBoundsException ae){</span>
+<span class="nc" id="L47">   System.out.println(&quot;INVALID STOCK SYMBOL&quot;);</span>
+<span class="nc" id="L48">   return 0;</span>
+<span class="nc" id="L49">  }</span>
+<span class="nc" id="L50">  return (0);</span>
+ }
+ 
+ public static String[] getStockInfo(String symbol){ //This method takes in a stock's name or symbol and returns info about the stock with the closest match
+  //Using a StringBuilder...
+<span class="fc" id="L55">  StringBuilder urlBuilder = new StringBuilder();</span>
+  //We specify our url...
+<span class="fc" id="L57">  urlBuilder.append(&quot;https://www.alphavantage.co/query?function=SYMBOL_SEARCH&amp;keywords=&quot;);</span>
+  //We define our stock that we'd like to recieve data for...
+<span class="fc" id="L59">  urlBuilder.append(symbol);</span>
+<span class="fc" id="L60">  urlBuilder.append(&quot;&amp;apikey=7X34UXTUDREKB4IK&amp;datatype=csv&quot;);</span>
+
+  try {
+   //We try to connect to our url...
+<span class="fc" id="L64">   URL url = new URL(urlBuilder.toString());</span>
+<span class="fc" id="L65">   URLConnection urlConn = url.openConnection();</span>
+   //and instantiate an inputstream to read from the URL...
+<span class="fc" id="L67">   InputStreamReader inStream = new InputStreamReader(urlConn.getInputStream());</span>
+<span class="fc" id="L68">   BufferedReader buff = new BufferedReader(inStream);</span>
+<span class="fc" id="L69">   buff.readLine();</span>
+<span class="fc" id="L70">   String line = buff.readLine();</span>
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">   if (line!=null){</span>
+<span class="fc" id="L72">   String [] data = line.split(&quot;,&quot;);</span>
+<span class="fc" id="L73">   return data;</span>
+   }
+   else{
+<span class="nc" id="L76">     return null;</span>
+   }
+  }
+
+<span class="nc" id="L80">  catch (MalformedURLException mu){ </span>
+<span class="nc" id="L81">   System.out.println(mu.getMessage());</span>
+<span class="nc" id="L82">   return null;</span>
+  }
+<span class="nc" id="L84">  catch (IOException io){</span>
+<span class="nc" id="L85">   System.out.println(io.getMessage());</span>
+<span class="nc" id="L86">   return null;</span>
+  }
+<span class="nc" id="L88">  catch(ArrayIndexOutOfBoundsException ae){</span>
+<span class="nc" id="L89">   System.out.println(&quot;INVALID STOCK SYMBOL&quot;);</span>
+<span class="nc" id="L90">   return (null);</span>
+  }
+ }
+ 
+  public static ArrayList&lt;String&gt; getStockList(String symbol){ //This method takes in a stock's name or symbol and returns info about the stock with the closest match
+  //Using a StringBuilder...
+<span class="fc" id="L96">  StringBuilder urlBuilder = new StringBuilder();</span>
+  //We specify our url...
+<span class="fc" id="L98">  urlBuilder.append(&quot;https://www.alphavantage.co/query?function=SYMBOL_SEARCH&amp;keywords=&quot;);</span>
+  //We define our stock that we'd like to recieve data for...
+<span class="fc" id="L100">  urlBuilder.append(symbol);</span>
+<span class="fc" id="L101">  urlBuilder.append(&quot;&amp;apikey=7X34UXTUDREKB4IK&amp;datatype=csv&quot;);</span>
+  
+<span class="fc" id="L103">  ArrayList&lt;String&gt; output = new ArrayList&lt;String&gt;();</span>
+  try {
+   //We try to connect to our url...
+<span class="fc" id="L106">   URL url = new URL(urlBuilder.toString());</span>
+<span class="fc" id="L107">   URLConnection urlConn = url.openConnection();</span>
+   //and instantiate an inputstream to read from the URL...
+<span class="fc" id="L109">   InputStreamReader inStream = new InputStreamReader(urlConn.getInputStream());</span>
+<span class="fc" id="L110">   BufferedReader buff = new BufferedReader(inStream);</span>
+<span class="fc" id="L111">   buff.readLine();</span>
+<span class="fc" id="L112">   String line = buff.readLine();</span>
+<span class="fc bfc" id="L113" title="All 2 branches covered.">   while (line != null){</span>
+<span class="fc" id="L114">     String[] data = line.split(&quot;,&quot;);</span>
+<span class="fc" id="L115">     output.add(data[1]);</span>
+<span class="fc" id="L116">     line = buff.readLine();</span>
+<span class="fc" id="L117">   }</span>
+  }
+<span class="nc" id="L119">  catch (MalformedURLException mu){ </span>
+<span class="nc" id="L120">   System.out.println(mu.getMessage());</span>
+<span class="nc" id="L121">   return null;</span>
+  }
+<span class="fc" id="L123">  catch (IOException io){</span>
+<span class="fc" id="L124">   System.out.println(io.getMessage());</span>
+<span class="fc" id="L125">   return null;</span>
+  }
+<span class="nc" id="L127">  catch(ArrayIndexOutOfBoundsException ae){</span>
+<span class="nc" id="L128">   System.out.println(&quot;INVALID STOCK SYMBOL&quot;);</span>
+<span class="nc" id="L129">   return (null);</span>
+<span class="fc" id="L130">  }</span>
+<span class="fc" id="L131">  return output;</span>
+ }
+ 
+ 
+
+ public static String getStockSymbol(String keyword){ //Uses getStockInfo to return the symbol of a stock when given other information about it (ie it's name)
+<span class="fc" id="L137">   String[] output = getStockInfo(keyword);</span>
+<span class="pc bpc" id="L138" title="1 of 2 branches missed.">   if (output!=null){</span>
+<span class="fc" id="L139">     return getStockInfo(keyword)[0];</span>
+   }else{
+<span class="nc" id="L141">     return null;</span>
+   } 
+ }
+
+ public static String getStockName(String keyword){ //Uses getStockInfo to return the name of a stock when given other information about it (ie it's symbol)
+<span class="fc" id="L146">   String[] output = getStockInfo(keyword);</span>
+<span class="pc bpc" id="L147" title="1 of 2 branches missed.">   if (output!=null){</span>
+<span class="nc" id="L148">     return getStockInfo(keyword)[1];</span>
+   }else{
+<span class="nc" id="L150">     return null;</span>
+   } 
+ }
+ 
+ public static String getStockType(String keyword){ //Uses getStockInfo to return the type (equity,etc.) of a stock when given other information about it (ie it's name)
+<span class="fc" id="L155">   String[] output = getStockInfo(keyword);</span>
+<span class="pc bpc" id="L156" title="1 of 2 branches missed.">   if (output!=null){</span>
+<span class="nc" id="L157">     return getStockInfo(keyword)[2];</span>
+   }else{
+<span class="nc" id="L159">     return null;</span>
+   } 
+ }
+ 
+ public static String getStockLocale(String keyword){ //Uses getStockInfo to return the locale of the market that a stock is in when given other information about it (ie it's name)
+<span class="fc" id="L164">   String[] output = getStockInfo(keyword);</span>
+<span class="pc bpc" id="L165" title="1 of 2 branches missed.">   if (output!=null){</span>
+<span class="nc" id="L166">     return getStockInfo(keyword)[3];</span>
+   }else{
+<span class="nc" id="L168">     return null;</span>
+   } 
+ }
+ 
+ public static String getStockCurrency(String keyword){ //Uses getStockInfo to return the native currency of the locale of a stock when given other information about it (ie it's name)
+<span class="fc" id="L173">   String[] output = getStockInfo(keyword);</span>
+<span class="pc bpc" id="L174" title="1 of 2 branches missed.">   if (output!=null){</span>
+<span class="nc" id="L175">     return getStockInfo(keyword)[7];</span>
+   }else{
+<span class="nc" id="L177">     return null;</span>
+   } 
+ }
+ 
+ 
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.7.201606060606</span></div></body></html>

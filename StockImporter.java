@@ -1,3 +1,4 @@
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -49,7 +50,10 @@ public class StockImporter {
   return (0);
  }
  
- public static String[] getStockInfo(String symbol){ //This method takes in a stock's name or symbol and returns info about the stock with the closest match
+ public static String[] getStockInfo(String symbol){ 
+  // This method can take in any keywords for a stock...(name, symbol, etc) and will return the array of all information
+  // about that stock With the format (Symbol, Name, Type, Location, Market Open, Market Close, Time Zone, Currency, Match to keyword)
+   
   //Using a StringBuilder...
   StringBuilder urlBuilder = new StringBuilder();
   //We specify our url...
@@ -90,7 +94,10 @@ public class StockImporter {
   }
  }
  
-  public static ArrayList<String> getStockList(String symbol){ //This method takes in a stock's name or symbol and returns info about the stock with the closest match
+  public static ArrayList<String> getStockList(String symbol){
+  // This method takes in a keyword and returns the list of names for the top stocks that match that keyword
+  // MSFT returns a list of microsoft stocks for example.
+  
   //Using a StringBuilder...
   StringBuilder urlBuilder = new StringBuilder();
   //We specify our url...
@@ -132,7 +139,7 @@ public class StockImporter {
  
  
 
- public static String getStockSymbol(String keyword){ //Uses getStockInfo to return the symbol of a stock when given other information about it (ie it's name)
+ public static String getStockSymbol(String keyword){ //Returns the symbol of the stock most closely matching the keyword (can be symbol or name)
    String[] output = getStockInfo(keyword);
    if (output!=null){
      return getStockInfo(keyword)[0];
@@ -141,7 +148,7 @@ public class StockImporter {
    } 
  }
 
- public static String getStockName(String keyword){ //Uses getStockInfo to return the name of a stock when given other information about it (ie it's symbol)
+ public static String getStockName(String keyword){ //Returns the name of the stock most closely matching the keyword
    String[] output = getStockInfo(keyword);
    if (output!=null){
      return getStockInfo(keyword)[1];
@@ -150,7 +157,7 @@ public class StockImporter {
    } 
  }
  
- public static String getStockType(String keyword){ //Uses getStockInfo to return the type (equity,etc.) of a stock when given other information about it (ie it's name)
+ public static String getStockType(String keyword){ //Returns the type of the stock most closely matching the keyword (can be symbol or name)
    String[] output = getStockInfo(keyword);
    if (output!=null){
      return getStockInfo(keyword)[2];
@@ -159,7 +166,7 @@ public class StockImporter {
    } 
  }
  
- public static String getStockLocale(String keyword){ //Uses getStockInfo to return the locale of the market that a stock is in when given other information about it (ie it's name)
+ public static String getStockLocale(String keyword){ //Returns the location of the stock most closely matching the keyword (can be symbol or name)
    String[] output = getStockInfo(keyword);
    if (output!=null){
      return getStockInfo(keyword)[3];
@@ -168,7 +175,7 @@ public class StockImporter {
    } 
  }
  
- public static String getStockCurrency(String keyword){ //Uses getStockInfo to return the native currency of the locale of a stock when given other information about it (ie it's name)
+ public static String getStockCurrency(String keyword){ //Returns the currency ues at the location of the stock most closely matching the keyword (can be symbol or name)
    String[] output = getStockInfo(keyword);
    if (output!=null){
      return getStockInfo(keyword)[7];
