@@ -184,21 +184,22 @@ public class StockImporter {
    } 
  }
  
- public static Object[] timeSeriesDaily(String keyword){
+ public static Object[] timeSeriesDaily(String symbol){
+   //Using a StringBuilder...
+   StringBuilder urlBuilder = new StringBuilder();
    
-   private String[] date =  new String[];
-   private float[] open = new float[];
-   private float[] high = new float[];
-   private float[] low = new float[];
-   private float[] close = new float[];
-   private float[] volume = new float[];
+   ArrayList<String> date = new ArrayList<String>();
+   ArrayList<Float> open = new ArrayList<Float>();
+   ArrayList<Float> high = new ArrayList<Float>();
+   ArrayList<Float> low = new ArrayList<Float>();
+   ArrayList<Float> close = new ArrayList<Float>();
+   ArrayList<Float> volume = new ArrayList<Float>();
    
-  
   //We specify our url...
   urlBuilder.append("https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=");
   //We define our stock that we'd like to recieve data for...
   urlBuilder.append(symbol);
-  urlBuilder.append("&apikey=7X34UXTUDREKB4IK&datatype=csv");
+  urlBuilder.append("&outputsize=full&apikey=7X34UXTUDREKB4IK&datatype=csv");
 
   try {
    //We try to connect to our url...
@@ -212,13 +213,13 @@ public class StockImporter {
    int i  = 0;
    while (line != null){
     String [] data = line.split(",");
-    date[i] = data[0];
-    open[i] = Float.parseFloat(data[1]);
-    high[i] = Float.parseFloat(data[2]);
-    low[i] = Float.parseFloat(data[3]);
-    close[i] = Float.parseFloat(data[4]);
-    volume[i] = Float.parseFloat(data[5]);
-    i++;
+    date.add(data[0]);
+    open.add(Float.parseFloat(data[1]));
+    high.add(Float.parseFloat(data[2]));
+    low.add(Float.parseFloat(data[3]));
+    close.add(Float.parseFloat(data[4]));
+    volume.add(Float.parseFloat(data[5]));
+    line = buff.readLine();
    }
    return new Object[]{date, open, high, low, close, volume};
   }
@@ -235,7 +236,6 @@ public class StockImporter {
    System.out.println("INVALID STOCK SYMBOL");
    return null;
   }
-  return null;
  }
  
  

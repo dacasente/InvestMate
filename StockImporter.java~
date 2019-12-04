@@ -184,5 +184,59 @@ public class StockImporter {
    } 
  }
  
+ public static Object[] TimeSeriesDaily(String keyword){
+   
+   private String[] date =  new String[];
+   private float[] open = new float[];
+   private float[] high = new float[];
+   private float[] low = new float[];
+   private float[] close = new float[];
+   private float[] volume = new float[];
+   
+  
+  //We specify our url...
+  urlBuilder.append("https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=");
+  //We define our stock that we'd like to recieve data for...
+  urlBuilder.append(symbol);
+  urlBuilder.append("&apikey=7X34UXTUDREKB4IK&datatype=csv");
+
+  try {
+   //We try to connect to our url...
+   URL url = new URL(urlBuilder.toString());
+   URLConnection urlConn = url.openConnection();
+   //and instantiate an inputstream to read from the URL...
+   InputStreamReader inStream = new InputStreamReader(urlConn.getInputStream());
+   BufferedReader buff = new BufferedReader(inStream);
+   buff.readLine();
+   String line = buff.readLine();
+   int i  = 0;
+   while (line != null){
+    String [] data = line.split(",");
+    date[i] = data[0];
+    open[i] = Float.parseFloat(data[1]);
+    high[i] = Float.parseFloat(data[2]);
+    low[i] = Float.parseFloat(data[3]);
+    close[i] = Float.parseFloat(data[4]);
+    volume[i] = Float.parseFloat(data[5]);
+    i++;
+   }
+   return new Object[]{date, open, high, low, close, volume};
+  }
+
+  catch (MalformedURLException mu){
+   System.out.println(mu.getMessage());
+   return null;
+  }
+  catch (IOException io){
+   System.out.println(io.getMessage());
+   return null;
+  }
+  catch(ArrayIndexOutOfBoundsException ae){
+   System.out.println("INVALID STOCK SYMBOL");
+   return null;
+  }
+  return null;
+ }
+ 
  
 }
