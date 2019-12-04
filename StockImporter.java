@@ -37,7 +37,7 @@ public class StockImporter {
 
   catch (MalformedURLException mu){
    System.out.println(mu.getMessage());
-   return 0;
+   return 1;
   }
   catch (IOException io){
    System.out.println(io.getMessage());
