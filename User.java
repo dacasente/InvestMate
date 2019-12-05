@@ -6,10 +6,12 @@ public class User{
   private String name;
   private int age;
   private ArrayList<OwnedStock> portfolio;
+  private String password;
   
-  public User(String name, int age){
+  public User(String name, int age, String password){
     this.name = name;
     this.age = age;
+    this.password = password;
   }
   
   public String getName(){
@@ -35,4 +37,9 @@ public class User{
   public void setPortfolio(ArrayList<OwnedStock> portfolio){
    this.portfolio = portfolio; 
   }
-} 
+  
+  public boolean checkPassword(String input){
+    return input.equals(this.password);
+  }
+  
+}

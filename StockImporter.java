@@ -318,7 +318,6 @@ public class StockImporter {
    BufferedReader buff = new BufferedReader(inStream);
    buff.readLine();
    String line = buff.readLine();
-   int i  = 0;
    while (line != null){
     String [] data = line.split(",");
     date.add(data[0]);
@@ -346,5 +345,133 @@ public class StockImporter {
   }
  }
   
- 
+  public static Float getLastDayClose(String symbol){
+    Float close = new Float(0);
+  //Using a StringBuilder...
+  StringBuilder urlBuilder = new StringBuilder();
+  //We specify our url...
+  urlBuilder.append("https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=");
+  //We define our stock that we'd like to recieve data for...
+  urlBuilder.append(symbol);
+  urlBuilder.append("&outputsize=full&apikey=7X34UXTUDREKB4IK&datatype=csv");
+
+  try {
+   //We try to connect to our url...
+   URL url = new URL(urlBuilder.toString());
+   URLConnection urlConn = url.openConnection();
+   //and instantiate an inputstream to read from the URL...
+   InputStreamReader inStream = new InputStreamReader(urlConn.getInputStream());
+   BufferedReader buff = new BufferedReader(inStream);
+   buff.readLine();
+   String line = buff.readLine();
+   String[] data = line.split(",");
+   close=(Float.parseFloat(data[4]));
+          
+   return close;
+  }
+
+  catch (MalformedURLException mu){
+   System.out.println(mu.getMessage());
+   return null;
+  }
+  catch (IOException io){
+   System.out.println(io.getMessage());
+   return null;
+  }
+  catch(ArrayIndexOutOfBoundsException ae){
+   System.out.println("INVALID STOCK SYMBOL");
+   return null;
+  }
+ }
+  
+  public static Object[] getSectorInfo(){
+    
+    ArrayList<Float> energy = new ArrayList<Float>();
+    ArrayList<Float> financials = new ArrayList<Float>();
+    ArrayList<Float> healthcare = new ArrayList<Float>();
+    ArrayList<Float> utilities = new ArrayList<Float>();
+    ArrayList<Float> consumerStaples = new ArrayList<Float>();
+    ArrayList<Float> communications = new ArrayList<Float>();
+    ArrayList<Float> realEstate = new ArrayList<Float>();
+    ArrayList<Float> consumerDisc = new ArrayList<Float>();
+    ArrayList<Float> informationTech = new ArrayList<Float>();
+    ArrayList<Float> industries = new ArrayList<Float>();
+    ArrayList<Float> materials = new ArrayList<Float>();
+    
+    Float close = new Float(0);
+    
+    //Using a StringBuilder...
+    StringBuilder urlBuilder = new StringBuilder();
+    //We specify our url...
+    urlBuilder.append("https://www.alphavantage.co/query?function=SECTOR&apikey=7X34UXTUDREKB4IK");
+    
+    try {
+      //We try to connect to our url...
+      URL url = new URL(urlBuilder.toString());
+      URLConnection urlConn = url.openConnection();
+      //and instantiate an inputstream to read from the URL...
+      InputStreamReader inStream = new InputStreamReader(urlConn.getInputStream());
+      BufferedReader buff = new BufferedReader(inStream);
+      buff.readLine();
+      buff.readLine();
+      buff.readLine();
+      buff.readLine();
+      buff.readLine();
+      buff.readLine();
+      String line = buff.readLine();
+      /*while (line != null){*/
+        String[] data = line.split("%");
+        energy.add(Float.parseFloat(data[0]));
+        /*
+        line = buff.readLine();
+        String[] data1 = line.split("%");
+        financials.add(Float.parseFloat(data1[0]));
+        line = buff.readLine();
+        String[] data2 = line.split("%");
+        healthcare.add(Float.parseFloat(data2[0]));
+        line = buff.readLine();
+        String[] data3 = line.split("%");
+        utilities.add(Float.parseFloat(data3[0]));
+        line = buff.readLine();
+        String[] data4 = line.split("%");
+        consumerStaples.add(Float.parseFloat(data4[0]));
+        line = buff.readLine();
+        String[] data5 = line.split("%");
+        communications.add(Float.parseFloat(data5[0]));
+        line = buff.readLine();
+        String[] data6 = line.split("%");
+        realEstate.add(Float.parseFloat(data6[0]));
+        line = buff.readLine();
+        String[] data7 = line.split("%");
+        consumerDisc.add(Float.parseFloat(data7[0]));
+        line = buff.readLine();
+        String[] data8 = line.split("%");
+        informationTech.add(Float.parseFloat(data8[0]));
+        line = buff.readLine();
+        String[] data9 = line.split("%");
+        industries.add(Float.parseFloat(data9[0]));
+        line = buff.readLine();
+        String[] data0 = line.split("%");
+        materials.add(Float.parseFloat(data0[0]));
+        buff.readLine();
+        buff.readLine();
+      }*/
+      return new Object[]{energy/*,financials,healthcare,utilities,consumerStaples,communications,realEstate,consumerDisc,informationTech,industries,materials*/};
+    }
+    
+    catch (MalformedURLException mu){
+      System.out.println(mu.getMessage());
+      return null;
+    }
+    catch (IOException io){
+      System.out.println(io.getMessage());
+      return null;
+    }
+    catch(ArrayIndexOutOfBoundsException ae){
+      System.out.println("INVALID STOCK SYMBOL");
+      return null;
+    }
+  }
+  
+  
 }
