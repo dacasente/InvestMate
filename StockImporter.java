@@ -37,7 +37,7 @@ public class StockImporter {
 
   catch (MalformedURLException mu){
    System.out.println(mu.getMessage());
-   return 1;
+   return 0;
   }
   catch (IOException io){
    System.out.println(io.getMessage());
@@ -473,5 +473,14 @@ public class StockImporter {
     }
   }
   
+  public static boolean isStockLive(String symbol){
+    float a = StockImporter.getCurrentPrice(symbol);
+    if (a != 0){
+      return true;
+    }
+    else{
+      return false;
+    }
+  }
   
 }
