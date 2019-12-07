@@ -480,7 +480,7 @@ public class StockImporter {
         }
         line = buff.readLine();
       }
-      return new Object[]{communications,consumerDisc,consumerStaples,energy,financials,industries,informationTech,healthcare,materials,realEstate,utilities};
+      return new Object[]{"Communication Services",communications,"Consumer Discretionary",consumerDisc,"Consumer Staples",consumerStaples,"Energy",energy,"Financials",financials,"Industrials",industries,"Information Technology",informationTech,"Health Care",healthcare,"Materials",materials,"Real Estate",realEstate,"Utilities",utilities};
     }
     
     catch (MalformedURLException mu){
@@ -497,7 +497,6 @@ public class StockImporter {
     }
   }
   
-  /*/////////////////////////////////////////////////////////////*/
   
   public static boolean isStockLive(String symbol){
     float a = StockImporter.getCurrentPrice(symbol);
