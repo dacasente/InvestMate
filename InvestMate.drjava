@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<drjava version="drjava-20160913-225446">
+  <project autorefresh="false" main="" root="" work="">
+    <createjar file=""/>
+    <source>
+      <file active="true" name="StockImporter.java" package="" timestamp="06-Dec-2019 18:57:14">
+        <select from="16480" to="16480"/>
+        <scroll column="7112" row="680"/>
+      </file>
+      <file name="OwnedStock.java" package="" timestamp="29-Oct-2019 01:01:11">
+        <select from="16480" to="16480"/>
+        <scroll column="7112" row="680"/>
+      </file>
+      <file name="Portfolio.java" package="" timestamp="29-Oct-2019 01:02:33">
+        <select from="16480" to="16480"/>
+        <scroll column="7112" row="680"/>
+      </file>
+      <file name="Stock.java" package="" timestamp="28-Oct-2019 23:11:14">
+        <select from="16480" to="16480"/>
+        <scroll column="7112" row="680"/>
+      </file>
+      <file name="StockImporterTest.java" package="" timestamp="29-Nov-2019 17:54:58">
+        <select from="16480" to="16480"/>
+        <scroll column="7112" row="680"/>
+      </file>
+      <file name="StockPriceEntry.java" package="" timestamp="28-Oct-2019 23:11:14">
+        <select from="16480" to="16480"/>
+        <scroll column="7112" row="680"/>
+      </file>
+      <file name="User.java" package="" timestamp="05-Dec-2019 01:06:23">
+        <select from="16480" to="16480"/>
+        <scroll column="7112" row="680"/>
+      </file>
+      <file name="UserInterface.java" package="" timestamp="28-Oct-2019 23:11:14">
+        <select from="16480" to="16480"/>
+        <scroll column="7112" row="680"/>
+      </file>
+      <file name="UserManager.java" package="" timestamp="05-Dec-2019 19:30:47">
+        <select from="16480" to="16480"/>
+        <scroll column="7112" row="680"/>
+      </file>
+    </source>
+    <included/>
+    <excluded/>
+    <collapsed/>
+    <classpath>
+      <file absolute="false" name="java-json.jar"/>
+    </classpath>
+    <breakpoints/>
+    <watches/>
+    <bookmarks/>
+    <preferences/>
+  </project>
+</drjava>

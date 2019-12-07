@@ -1,4 +1,18 @@
-
+import org.json.CDL;
+import org.json.Cookie;
+import org.json.CookieList;
+import org.json.HTTP;
+import org.json.HTTPTokener;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONML;
+import org.json.JSONObject;
+import org.json.JSONString;
+import org.json.JSONStringer;
+import org.json.JSONTokener;
+import org.json.JSONWriter;
+import org.json.XML;
+import org.json.XMLTokener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -416,47 +430,57 @@ public class StockImporter {
       buff.readLine();
       buff.readLine();
       buff.readLine();
-      buff.readLine();
-      buff.readLine();
       String line = buff.readLine();
-      /*while (line != null){*/
-        String[] data = line.split("%");
-        energy.add(Float.parseFloat(data[0]));
-        /*
+      int i = 0;
+      String pruned = new String();
+      while (line != null){
+        if (line.contains("Energy")){
+          pruned = line.replaceAll("[^0-9.-]", "");
+          energy.add(Float.parseFloat(pruned));
+        }
+        if (line.contains("Financials")){
+          pruned = line.replaceAll("[^0-9.-]", "");
+          financials.add(Float.parseFloat(pruned));
+        }
+        if (line.contains("Health")){
+          pruned = line.replaceAll("[^0-9.-]", "");
+          healthcare.add(Float.parseFloat(pruned));
+        }
+        if (line.contains("Industrials")){
+          pruned = line.replaceAll("[^0-9.-]", "");
+          industries.add(Float.parseFloat(pruned));
+        }
+        if (line.contains("Information")){
+          pruned = line.replaceAll("[^0-9.-]", "");
+          informationTech.add(Float.parseFloat(pruned));
+        }
+        if (line.contains("Materials")){
+          pruned = line.replaceAll("[^0-9.-]", "");
+          materials.add(Float.parseFloat(pruned));
+        }
+        if (line.contains("Consumer")){
+          pruned = line.replaceAll("[^0-9.-]", "");
+          consumerDisc.add(Float.parseFloat(pruned));
+        }
+        if (line.contains("Communication")){
+          pruned = line.replaceAll("[^0-9.-]", "");
+          communications.add(Float.parseFloat(pruned));
+        }
+        if (line.contains("Consumer")){
+          pruned = line.replaceAll("[^0-9.-]", "");
+          consumerStaples.add(Float.parseFloat(pruned));
+        }
+        if (line.contains("Real Estate")){
+          pruned = line.replaceAll("[^0-9.-]", "");
+          realEstate.add(Float.parseFloat(pruned));
+        }
+        if (line.contains("Utilities")){
+          pruned = line.replaceAll("[^0-9.-]", "");
+          utilities.add(Float.parseFloat(pruned));
+        }
         line = buff.readLine();
-        String[] data1 = line.split("%");
-        financials.add(Float.parseFloat(data1[0]));
-        line = buff.readLine();
-        String[] data2 = line.split("%");
-        healthcare.add(Float.parseFloat(data2[0]));
-        line = buff.readLine();
-        String[] data3 = line.split("%");
-        utilities.add(Float.parseFloat(data3[0]));
-        line = buff.readLine();
-        String[] data4 = line.split("%");
-        consumerStaples.add(Float.parseFloat(data4[0]));
-        line = buff.readLine();
-        String[] data5 = line.split("%");
-        communications.add(Float.parseFloat(data5[0]));
-        line = buff.readLine();
-        String[] data6 = line.split("%");
-        realEstate.add(Float.parseFloat(data6[0]));
-        line = buff.readLine();
-        String[] data7 = line.split("%");
-        consumerDisc.add(Float.parseFloat(data7[0]));
-        line = buff.readLine();
-        String[] data8 = line.split("%");
-        informationTech.add(Float.parseFloat(data8[0]));
-        line = buff.readLine();
-        String[] data9 = line.split("%");
-        industries.add(Float.parseFloat(data9[0]));
-        line = buff.readLine();
-        String[] data0 = line.split("%");
-        materials.add(Float.parseFloat(data0[0]));
-        buff.readLine();
-        buff.readLine();
-      }*/
-      return new Object[]{energy/*,financials,healthcare,utilities,consumerStaples,communications,realEstate,consumerDisc,informationTech,industries,materials*/};
+      }
+      return new Object[]{communications,consumerDisc,consumerStaples,energy,financials,industries,informationTech,healthcare,materials,realEstate,utilities};
     }
     
     catch (MalformedURLException mu){
@@ -472,6 +496,8 @@ public class StockImporter {
       return null;
     }
   }
+  
+  /*/////////////////////////////////////////////////////////////*/
   
   public static boolean isStockLive(String symbol){
     float a = StockImporter.getCurrentPrice(symbol);
