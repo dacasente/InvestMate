@@ -1,181 +1,382 @@
-import java.text.SimpleDateFormat;  
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Calendar;
 import java.util.Date;
 import java.lang.Math;
 
-public class MetricCalculator{
-  private String name;
-  private int outlook;
-  private double[] prices = {266.18,266.37,261.78,262.01,263.19,266.29,267.1,265.76,262.64,264.47,261.96,262.2,260.14,259.43,257.24,257.13,257.5,255.82,248.76,243.26,243.29,249.05,246.58,243.58,243.18,239.96,240.51,236.41,235.28,234.37,235.32,235.87,236.21,230.09,227.03,224.4,227.06,227.01,220.82,218.96,224.59,223.97,218.82,219.89,221.03,217.68,218.72,217.73,220.96,222.77,220.7,219.9,218.75,223.09,223.59,216.7,214.17,213.26,213.28,209.19,205.7,208.74,209.01,205.53,204.16,206.49,202.64,212.46,212.64,210.36,210.35,206.5,201.74,202.75,208.97,200.48,200.99,203.43,199.04,197,193.34,204.02,208.43,213.04,208.78,209.68,207.74,207.02,208.67,208.84,207.22,202.59,205.66,203.35,204.5,205.21,203.3,201.75,203.23,201.24,200.02,204.23,204.41,202.73,201.55,197.92,199.74,199.8,195.57,198.58,198.78,199.46,197.87,198.45,193.89,192.74,194.15,194.19,194.81,192.58,190.15,185.22,182.54,179.64,173.3,175.07,178.3,177.38,178.23,178.97,179.66,182.78,186.6,183.09,189,190.08,190.92,188.66,185.72,197.18,200.72};
-  private double eps = 11.89;
-  
-  public MetricCalculator(String name, String outlook){
-    if(outlook.equals( "3 Days")){
-      this.outlook = 3;
-    }
-    else if(outlook.equals("1 Week")){
-      this.outlook = 7;
-    }
-    else if(outlook.equals("1 Month")){
-      this.outlook = 21;
-    }
-    else{
-      this.outlook = 63;
-    }
+/**
+ * 
+ * @author davidcasente
+ * This class calculates all metrics necessary for the application.
+ *  It is utilized on the main page and stock search to calculate the price changes, and
+ *  the stock analysis to compare values that helps create analysis.
+ *  
+ */
+public class MetricCalculator {
+	private String name;
+	private int outlook;
+	private Double[] prices;
+	private Double eps;
 
-    this.name = name;
-  }
-  
-  public String getOutlook(){
-    if(outlook == 3){
-      return "3 Days";
-    }
-    else if(outlook == 7){
-      return "1 Week";
-    }
-    else if(outlook == 21){
-      return "1 Month";
-    }
-    else{
-      return "3 Months";
-    }
-  }
-  
-  public void setOutlook(String outlook) {
-	  if(outlook.equals( "3 Days")){
-	      this.outlook = 3;
-	    }
-	    else if(outlook.equals("1 Week")){
-	      this.outlook = 7;
-	    }
-	    else if(outlook.equals("1 Month")){
-	      this.outlook = 21;
-	    }
-	    else{
-	      this.outlook = 63;
-	    }
-	  
-  }
-  
-  public double getEps(){
-    return eps;
-  }
-  
-  public double getPrevClose(){
-    return prices[0];
-  }
-  
-  public double getTodayChange(int quantity) {
-	  double change = prices[0] - prices[1];
-	  return (double) change * quantity;
-  }
-  
-  public double getNetChange(String today, String purchased, int quantity) {
-	  SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
-	  
-	  try {
-		  Date dateNow = formatter.parse(today);
-		  Date datePurchased = formatter.parse(purchased);
-		  
-		  long diff = dateNow.getTime() - datePurchased.getTime();
-		  int days = Math.round(diff / (1000 * 60 * 60 * 24));
-		  
-		  double change = prices[0] - prices[days];
-		  return (double) change * quantity;
-	  }
-	  catch(Exception e){
-		  return -0.00001;
-	  }
-	  
-  }
-  
-  
-  
-  public double getThreeMonthLow(){
-    double min = 100000000;
-    for(int i= 0; i < outlook; i++){
-      if(min > prices[i]){
-        min = prices[i];
-      }
-    }
-    return min;
-  }
-  
-  public double getThreeMonthHigh(){
-    double max = 0;
-    for(int i = 0; i < outlook; i++){
-      if(max < prices[i]){
-        max = prices[i];
-      }
-    }
-    return max;
-  }
-  
-  
-  
-  public double getPERatio(){
-    return prices[0] / eps;
-    
-  }
-  
-  public double getHistPERatio(){
-    double sumPrices = 0;
-    for(int i = 0; i < outlook; i++){
-      sumPrices += prices[i];
-    }
-    
-    double avePrice = sumPrices / outlook;
-    return avePrice / eps;
-  }
-  
-  
-  
-  public double getHistPrice(){
-    double sumPrices = 0;
-    for(int i = 0; i < outlook; i++){
-      sumPrices += prices[i];
-    }
-    
-    return sumPrices / outlook;
-  }
-  
-  
-    
-    
-  public double getMomentum(int duration){
-    double lastPrice = prices[duration - 1];
-    
-    return prices[0] - lastPrice;
-  }
-  
-  public double getRSI(){
-    double sumPosDays = 0;
-    double sumNegDays = 0;
-    int numPos = 0;
-    for(int i = 0; i < outlook; i++){
-      if(prices[i] >= prices[i+1]){
-        sumPosDays += prices[i];
-        numPos++;
-      }
-      else{
-        sumNegDays += prices[i];
-      }
-    }
-    double avePosDays = sumPosDays / numPos;
-    double aveNegDays = sumNegDays / (outlook - numPos);
-    double relativeStrength = avePosDays / aveNegDays;
-    return (double) 100 - (100 / (1+ (relativeStrength)));
-  }
-  
-  public double getEMA(int duration){
-    double weight = (double) 2 / (duration + 1);
-    double ema = prices[duration];
-    for(int i = duration - 1; i >= 0; i--){
-      ema = (prices[i] * weight) + (ema * (1 - weight));
-    }
-    return ema;
-  }
-  
-  
-  
-  
+	/**
+	 * creates the metric calculator. Grabs the relevant stock info from the stock database.
+	 * @param name
+	 * @param outlook
+	 */
+	public MetricCalculator(String name, String outlook) {
+		if (outlook.equals("3 Days")) {
+			this.outlook = 3;
+		} else if (outlook.equals("1 Week")) {
+			this.outlook = 7;
+		} else if (outlook.equals("1 Month")) {
+			this.outlook = 21;
+		} else {
+			this.outlook = 63;
+		}
+
+		this.name = name;
+		StockDatabase stockdb = new StockDatabase();
+		prices = stockdb.getStockPrices(name);
+		eps = stockdb.getStockEps(name);
+	}
+
+	
+	/**
+	 * 
+	 * @return outlook
+	 */
+	public String getOutlook() {
+		if (outlook == 3) {
+			return "3 Days";
+		} else if (outlook == 7) {
+			return "1 Week";
+		} else if (outlook == 21) {
+			return "1 Month";
+		} else {
+			return "3 Months";
+		}
+	}
+
+	/**
+	 * 
+	 * @param outlook
+	 * @return the outlook in format of number of days
+	 */
+	public int numOutlook(String outlook) {
+		int output = 0;
+		if (outlook.equals("3 Days")) {
+			output = 3;
+		} else if (outlook.equals("1 Week")) {
+			output = 7;
+		} else if (outlook.equals("1 Month")) {
+			output = 21;
+		} else {
+			output = 63;
+		}
+		return output;
+
+	}
+
+	/**
+	 * sets the outlook of the calculator
+	 * @param outlook
+	 */
+	public void setOutlook(String outlook) {
+		if (outlook.equals("3 Days")) {
+			this.outlook = 3;
+		} else if (outlook.equals("1 Week")) {
+			this.outlook = 7;
+		} else if (outlook.equals("1 Month")) {
+			this.outlook = 21;
+		} else {
+			this.outlook = 63;
+		}
+
+	}
+
+	/**
+	 * 
+	 * @return eps variable
+	 */
+	public Double getEps() {
+		return eps;
+	}
+
+	/**
+	 * 
+	 * @return the stock price of the last close
+	 */
+	public Double getPrevClose() {
+		return prices[0];
+	}
+	
+	
+
+	/**
+	 * 
+	 * @param quantity
+	 * @return the price difference between the last two days
+	 */
+	public Double getTodayChange(int quantity) {
+		Double change = prices[0] - prices[1];
+		return (Double) change * quantity;
+	}
+
+	/**
+	 * 
+	 * @param purchased
+	 * @param quantity
+	 * @return the price difference between today and when the stock was purchased
+	 */
+	public Double getNetChange(String purchased, int quantity) {
+		SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
+
+		try {
+			Date dateNow = Calendar.getInstance().getTime();
+			Date datePurchased = formatter.parse(purchased);
+
+			long diff = dateNow.getTime() - datePurchased.getTime();
+			int days = Math.round(diff / (1000 * 60 * 60 * 24));
+
+			Double change = prices[0] - prices[days];
+			return (Double) change * quantity;
+		} catch (Exception e) {
+			return -0.00001;
+		}
+
+	}
+
+	/**
+	 * 
+	 * @return gets the lowest stock price in three months
+	 */
+	public Double getThreeMonthLow() {
+		Double min = 100000000.0;
+		for (int i = 0; i < outlook; i++) {
+			if (min > prices[i]) {
+				min = prices[i];
+			}
+		}
+		return min;
+	}
+
+	/**
+	 * 
+	 * @return gets the highest the stock price has been in the last three months
+	 */
+	public Double getThreeMonthHigh() {
+		Double max = 0.0;
+		for (int i = 0; i < outlook; i++) {
+			if (max < prices[i]) {
+				max = prices[i];
+			}
+		}
+		return max;
+	}
+
+	/**
+	 * 
+	 * @return the pe ratio of the stock
+	 */
+	public Double getPERatio() {
+		return prices[0] / eps;
+
+	}
+
+	/**
+	 * 
+	 * @return the definition of pe ratio
+	 */
+	public static String getPERatioDefinition() {
+		String output = "The P/E Ratio equates the current stock price of a "
+				+ "company to its earnings per share. Also known as an earnings multiple,"
+				+ " the P/E Ratio tells us the ratio of how many dollars an investor spends "
+				+ "on a stock to how many dollars that company earns. The purpose of\n this metrics "
+				+ "is too see if investors are overpaying or underpaying for a stock.";
+		return output;
+
+	}
+
+	/**
+	 * 
+	 * @return return the  pe ratio based on the entire outlook
+	 */
+	public Double getHistPERatio() {
+		Double sumPrices = 0.0;
+		for (int i = 0; i < outlook; i++) {
+			sumPrices += prices[i];
+		}
+
+		Double avePrice = sumPrices / outlook;
+		return avePrice / eps;
+	}
+
+	/**
+	 * 
+	 * @return the average price over the outlook
+	 */
+	public Double getHistPrice() {
+		Double sumPrices = 0.0;
+		for (int i = 0; i < outlook; i++) {
+			sumPrices += prices[i];
+		}
+
+		return sumPrices / outlook;
+	}
+
+	
+	/**
+	 * 
+	 * @return the definition of the stock price
+	 */
+	public static String getPriceDefinition() {
+		String output = "The price of a company's stock is equivalent to the market capitalization of a"
+				+ " company divided by the number of outstanding\n shares. For example if a company has a "
+				+ "market capitalization of 400 million and has 50 million outstanding shares. The purpose of this"
+				+ " metric is obviously to determine how much a stock costs, but also to notice trends in this context.";
+		return output;
+	}
+
+	/**
+	 * 
+	 * @param dur
+	 * @return the momentum of the stock given the duration
+	 */
+	public Double getMomentum(String dur) {
+		int duration = numOutlook(dur);
+		Double lastPrice = prices[duration - 1];
+
+		return prices[0] - lastPrice;
+	}
+	
+	/**
+	 * 
+	 * @param dur
+	 * @return the historical momentum given the duration
+	 */
+	
+	public Double getHistMomentum(String dur) {
+		
+		int start = numOutlook(dur);
+		int end = start * 2;
+		Double lastPrice = prices[end - 1];
+
+		return prices[start] - lastPrice;
+	}
+
+	/**
+	 * 
+	 * @return the definition of market momentum
+	 */
+	public static String getMomentumDefinition() {
+		String output = "The market momentum of a stock is the net gain or loss of the stock price over a duration"
+				+ " can be calcualted as the stock\n price on the last day subtracted by the stock price on the first "
+				+ "day. The purpose of this metric is to define the trend of the stock during a duration";
+		return output;
+	}
+
+	/**
+	 * 
+	 * @return the relative strength index of the stock
+	 */
+	public Double getRSI() {
+		Double sumPosDays = 0.0;
+		Double sumNegDays = 0.0;
+		int numPos = 0;
+		for (int i = 0; i < outlook; i++) {
+			if (prices[i] >= prices[i + 1]) {
+				sumPosDays += prices[i];
+				numPos++;
+			} else {
+				sumNegDays += prices[i];
+			}
+		}
+		Double avePosDays = sumPosDays / numPos;
+		Double aveNegDays = sumNegDays / (outlook - numPos);
+		Double relativeStrength = avePosDays / aveNegDays;
+		return (double) 100 - (100 / (1 + (relativeStrength)));
+	}
+
+	/**
+	 * 
+	 * @return the definition of relative strength index
+	 */
+	public static String getRSIDefinition() {
+		String output = "The relative strength index is a measure of whether over purchasing or underpurchasing are "
+				+ "driving the stock price up or driving the stock price down respectively. This metric can be caluclated as "
+				+ "100 - (100 / (average stock price on a gaining day) / (average stock price on a losing day)). The purpose "
+				+ "of this metric is to determine if overselling or overbuying is present, which will help determine the future "
+				+ "trend of the price.";
+		return output;
+	}
+
+	/**
+	 * 
+	 * @param dur
+	 * @return the exponential moving average for the stock
+	 */
+	public Double getEMA(String dur) {
+		int duration = numOutlook(dur);
+		Double weight = (double) 2 / (duration + 1);
+		Double ema = prices[duration];
+		for (int i = duration - 1; i >= 0; i--) {
+			ema = (prices[i] * weight) + (ema * (1 - weight));
+		}
+		return ema;
+	}
+
+	/**
+	 * 
+	 * @return the definition of exponential moving average
+	 */
+	public static String getEMADefinition() {
+		String output = "The exponential moving average is essentially a more sophisticated version of the average stock price "
+				+ "over a duration. Instead of taking the simple average, the exponential moving average weights more recent prices"
+				+ " in a duration exponentially more than the previous price. THe purpose of this metric is too smooth out the "
+				+ "potential noise of the daily price changes and to have the most recent prices more pronounced as they are more "
+				+ "likely to contribute to future short term trends.";
+		return output;
+	}
+	
+	/**
+	 * 
+	 * @return the stock price values for the graph
+	 */
+	public Double[] getPriceGraphY() {
+		Double[] yPrices = new Double[outlook];
+		
+		for(int i = 0; i < yPrices.length; i++) {
+			yPrices[i] = prices[i];
+			
+		}
+		
+		return yPrices;
+		
+	}
+	
+	/**
+	 * 
+	 * @return the date values for the graph
+	 */
+	public String[] getPriceGraphX() {
+		Date today = Calendar.getInstance().getTime();
+		LocalDate day = today.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		
+		String[] dates = new String[outlook];
+		
+		for(int i=0; i < dates.length; i++) {
+			String strDay = "" + day.getMonthValue() + "/" 
+							   + day.getDayOfMonth() + "/"
+							   + day.getYear();
+			
+			dates[i] = strDay;
+			day = day.minusDays(1);
+			
+		}
+		
+		return dates;
+		
+	}
+
 }

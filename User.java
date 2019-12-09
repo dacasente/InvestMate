@@ -7,12 +7,20 @@ public class User{
   private String name;
   private int age;
   private Portfolio portfolio;
+  private String password;
   
-  public User(String name, int age){
+  public User(String name, int age, String password){
     this.name = name;
     this.age = age;
+    this.password = password;
   }
   
+  public String getPassword() {
+	  return password;
+  }
+  public void setPassword(String temp) {
+	  this.password = temp;
+  }
   public String getName(){
     return name;
   }
