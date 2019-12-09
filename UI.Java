@@ -54,17 +54,17 @@ public class UI extends Application {
 	// The Height and width of the window
 	int InitialHeightScreen = 728, InitialWidthScreen = 1200;
 	// Detect how many times the user has entered the specific screen
-	int TimesinStartScene = 0, TimesinLoginScene = 0, TimesinSignUpScene = 0, TimesCreatingUser = 0, TimeinOnboardScene = 0, TimesinMainScene = 0,TimesinEditPortfolioScene = 0, TimesinMyAccountScene = 0, TimesUpdatingUser = 0, TimesinSpecificStockScene = 0, TimeinIndividualStockAssesmentOnboardScene = 0, TimesinIndividualStockAssesmentScene = 0, TimesinPortfolioAssesmentScene = 0, TimesinSearchAStockScene = 0, TimesinMarketAssesmentScene = 0;
+	int TimesinStartScene = 0, TimesinLoginScene = 0, TimesinSignUpScene = 0, TimesCreatingUser = 0, TimeinOnboardScene = 0, TimesinMainScene = 0,TimesinEditPortfolioScene = 0, TimesinMyAccountScene = 0, TimesUpdatingUser = 0, TimesinSpecificStockScene = 0, TimeinIndividualStockAssesmentOnboardScene = 0, TimesinIndividualStockAssesmentScene = 0, TimesinPortfolioAssesmentScene = 0, TimesinSearchAStockScene = 0,TimeSearchingStock = 0, TimesinMarketAssesmentScene = 0;
 	
 	// This is the window that the user sees
 	Stage window;
 	
 	// Objects
 	User person;
-	StockImporter stockimporter;
 	LearningTool learningtool;
 	UserManager manage;
 	OwnedStock stock;
+	StockImporter imports;
 
 	// BorderPane for the main class
 	BorderPane rootmainScene = new BorderPane();
@@ -166,10 +166,8 @@ public class UI extends Application {
 	
 	// Loads the LogIn Scene
 	public void LoadLoginScene() {
-		// Make size of window not change between scene transitions
-		// Create Message that user does not exist pop up
-		// Do log in Stuff
 
+		// Text Styles
 		String BaseButtonStyle ="-fx-text-fill: white;"+
 				"-fx-background-color:transparent;"+
 				"-fx-border-color:white;"+
@@ -215,6 +213,7 @@ public class UI extends Application {
 		HBox txtField2 = new HBox();
 		HBox btns = new HBox(15);
 		
+		// TextFields
 		TextField NameBox = new TextField();
 		TextField PasswordBox = new TextField();
 		
@@ -259,7 +258,7 @@ public class UI extends Application {
 		SignInBtn.setStyle(BaseButtonStyle);
 		SignInBtn.setPrefSize(SignInSizeX, SignInSizeY);
 		HoverListener(SignInBtn,BaseButtonStyle,HoverButtonStyle);
-		SignInBtn.setOnAction(e -> CheckUser(Top));
+		SignInBtn.setOnAction(e -> CheckUser(Top, NameBox.getText(), PasswordBox.getText()));
 		btns.getChildren().add(SignInBtn);
 		
 		// New Account Button
@@ -271,7 +270,7 @@ public class UI extends Application {
 		NewAccount.setOnAction(e -> LeaveSignInNewAccount(NameBox, PasswordBox));
 		btns.getChildren().add(NewAccount);
 		
-		// Formatting stuff
+		// Formatting the page
 		btns.setAlignment(Pos.CENTER);
 		Top.getChildren().add(btns);
 		Top.setAlignment(Pos.CENTER);
@@ -283,28 +282,44 @@ public class UI extends Application {
 			LoginScene = new Scene(root, InitialWidthScreen, InitialHeightScreen);
 		window.setScene(LoginScene);
 	}
-	
+
+	// Updates page after leaving the sign in scene
 	public void LeaveSignInback(TextField Name, TextField Password) {
 		Name.clear();
 		Password.clear();
 		window.setScene(StartScene);
 	}
 	
+	// Updates page after leaving the sign in scene
 	public void LeaveSignInNewAccount(TextField Name, TextField Password) {
 		Name.clear();
 		Password.clear();
 		LoadSignUpScene();
 	}
 	
-	// This will check a user to see if they actually exist if the sign in button is pressed
-	// If the user does exist then we are gonna load their portfolio 
-	public void CheckUser(VBox top) {
+	// Tries to load the user user
+	public void CheckUser(VBox top, String name, String Password) {
 		
+		String ErrorTextStyle = "-fx-font: Courier New;"+
+			    "-fx-font-family: Courier New;"+
+			    "-fx-font-size: 15;"+
+			    "-fx-stroke: red";
+		
+		// Checks for User
+		if (UserManager.checkUser(name,Password)) {
+			person = UserManager.Login(name,Password);
+			LoadMainPage();
+		}
+		// if no User, a prompt appears
+		else {
+			Text Error = new Text("User does not exsist");
+			Error.setStyle(ErrorTextStyle);
+			top.getChildren().add(Error);
+		}
 	}
 
 	// Loads the SignUp Scene
 	public void LoadSignUpScene() {
-		// Make look more professional
 		// Add Rules for password
 		
 		String BaseButtonStyle ="-fx-text-fill: white;"+
@@ -430,16 +445,18 @@ public class UI extends Application {
 		window.setScene(SignUpScene);
 	}
 	
+	// Updates page after leaving the Sign up scene
 	public void LeaveSignUpPage(TextField name, ComboBox <Integer> AgeSelection, TextField password) {
 		name.clear();
 		password.clear();
 		AgeSelection.setValue(1);
 		window.setScene(LoginScene);
 	}
-	
+		
 	// Checks if the User has input all valid selections into the Fields
 	public void CreateUser(VBox root,TextField NameBox,ComboBox <Integer> AgeSelection, TextField PasswordBox) {
 		
+		// text style
 		String ErrorTextStyle = "-fx-font: Courier New;"+
 			    "-fx-font-family: Courier New;"+
 			    "-fx-font-size: 15;"+
@@ -447,31 +464,34 @@ public class UI extends Application {
 		
 		TimesCreatingUser++;
 		
+		// removes the previous error if there was one
 		if (TimesCreatingUser != 1)
 			root.getChildren().remove(root.getChildren().size()-1);
 		
+		// checks for all fields being completed
 		if (NameBox.getText().trim().isEmpty() || PasswordBox.getText().trim().isEmpty()) {
 			Text Error = new Text("You must fill out all the fields");
 			Error.setStyle(ErrorTextStyle);
 			root.getChildren().add(Error);
 		}
+		
+		// checks for age verification
 		else if (AgeSelection.getValue() < 18) {
 			Text Error = new Text("User must be 18 years or older");
 			Error.setStyle(ErrorTextStyle);
 			root.getChildren().add(Error);
 		}
+		// else creates the user
 		else {
-			// Make it so the Password is added
-			//manage.addUser(NameBox.getText(),AgeSelection.getValue(),PasswordBox.getText());
 			person = new User(NameBox.getText(),AgeSelection.getValue(),PasswordBox.getText());
 			LoadOnboardPage();
 		}
 	}
-	
-	public void LoadOnboardPage() {
-		// Make Possible to Scroll Down Stocks
-		// Create a Back Button and not create a user until the stocks are created
 
+	// Lets the User enter their portfolio
+	public void LoadOnboardPage() {
+
+		// styling the page
 		String BaseButtonStyle ="-fx-text-fill: white;"+
 				"-fx-background-color:transparent;"+
 				"-fx-border-color:white;"+
@@ -498,6 +518,7 @@ public class UI extends Application {
 		
 		TimeinOnboardScene++;
 		
+		// formating the page
 		BorderPane root = new BorderPane();
 		VBox Top = new VBox(15);
 		Top.setAlignment(Pos.CENTER);
@@ -505,8 +526,10 @@ public class UI extends Application {
 		SubTopRight.setPadding(new Insets(15, 15, 15, 15));
 		VBox stocks = new VBox(5);
 		
+		// local variable
 		int StocksInPorfolio = 0;
 		
+		// continue button
 		int ContinueButtonSizeX = 150,ContinueButtonSizeY = 45;
 		Button Continue = new Button("Continue");
 		Continue.setStyle(BaseButtonStyle);
@@ -516,6 +539,7 @@ public class UI extends Application {
 		Top.getChildren().add(SubTopRight);
 		Continue.setOnAction(e -> CheckStocks(stocks));
 		
+		// heasder
 		Text Header = new Text("Onboard Portfolio");
 		Header.setStyle(HeaderTextStyle);
 		SubTopCenter.setCenter(Header);
@@ -523,19 +547,22 @@ public class UI extends Application {
 		
 		root.setTop(Top);
 		
+		// adds the first stock Onboard to the scene
 		if (TimeinOnboardScene == 1)
 			AddAnotherStock(stocks, StocksInPorfolio);
 
+		// formating
 		root.setCenter(stocks);
 		root.setStyle("-fx-background-color: black");
 		if (TimeinOnboardScene == 1)
 			OnBoardScene = new Scene(root, InitialWidthScreen, InitialHeightScreen);
 		window.setScene(OnBoardScene);
 	}
-	
+
+	// Adds another stock to be added to the portfolio
 	public void AddAnotherStock(VBox stocks, int StocksInPorfolio){
-		// Fix the boarder for adding another Stock so that it is trim to the input information
 		
+		// styling of page
 		String BaseButtonStyle ="-fx-text-fill: white;"+
 				"-fx-background-color:transparent;"+
 				"-fx-border-color:white;"+
@@ -569,6 +596,7 @@ public class UI extends Application {
 		
 		StocksInPorfolio++;
 		
+		// formating of page
 		HBox elements = new HBox(15);
 		VBox STOCKS = new VBox(5);
 		VBox AMOUNT = new VBox(5);
@@ -583,17 +611,12 @@ public class UI extends Application {
 		NameText.toFront();
 		
 		// Stock Searcher
-		String[] SN = null;
-		try {
-			SN = OpenFile("TopUSCompanies.txt");
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+		StockDatabase data = new StockDatabase();
 		ComboBox<String> StockNames = new ComboBox<>();
 		StockNames.setTooltip(new Tooltip());
-		StockNames.getItems().addAll(SN);
+		StockNames.getItems().addAll(data.getAllStockNames());
 		new ComboBoxSearcher<String>(StockNames);
+		StockNames.getSelectionModel().selectFirst();
 		
 		// Quantity Text Parameters
 		Text QuantityText = new Text("Amount Purchased");
@@ -601,14 +624,14 @@ public class UI extends Application {
 		QuantityText.toFront();
 		
 		// TextBox for Amount of Stocks	
-		ComboBox<String> QuantityBox = new ComboBox<>();
-		String[] Quantity = new String[1000];
+		ComboBox<Integer> QuantityBox = new ComboBox<>();
 		for (int j = 1; j <= 1000 ; j++) {
-			QuantityBox.getItems().add(j+"");
+			QuantityBox.getItems().add(j);
 		}
+		QuantityBox.getSelectionModel().selectFirst();
 		
 		// Date Text Parameters;
-		Text DatePurchasedText = new Text("Date Purchased");
+		Text DatePurchasedText = new Text("Date Purchased(MM,DD,YY)");
 		DatePurchasedText.setStyle(StockTextStyle);
 		DatePurchasedText.toFront();
 		
@@ -620,14 +643,15 @@ public class UI extends Application {
 		Delete.setOnAction(e -> stocks.getChildren().remove(elements));
 		HoverListener(Delete,BaseButtonStyle,HoverButtonStyle);
 		
-		// Month
+		// Month selection
 		String[] Months = {"01","02","03","04","05","06","07","08","09","10","11","12"};
 		ComboBox<String> Month = new ComboBox<>();
 		for (int i = 0; i < Months.length; i++) {
 			Month.getItems().add(Months[i]);
 		}
+		Month.getSelectionModel().selectFirst();
 		
-		// Day
+		// Day selection 
 		ComboBox<String> Day = new ComboBox<>();
 		for (int j = 1; j <= 31 ; j++) {
 			String k;
@@ -637,10 +661,12 @@ public class UI extends Application {
 				k = "" + j;
 			Day.getItems().add(k);
 		}
+		Day.getSelectionModel().selectFirst();
+
 		
-		// Year
+		// Year selection
 		ComboBox<String> Year = new ComboBox<>();
-		for (int k = 00; k <= 19 ; k++) {
+		for (int k = 14; k <= 19 ; k++) {
 			String j;
 			if (k < 10)
 				j = "0"+k;
@@ -648,6 +674,8 @@ public class UI extends Application {
 				j = "" + k;
 			Year.getItems().add(j);
 		}
+		Year.getSelectionModel().selectFirst();
+
 		
 		// Remove Previous button
 		if (StocksInPorfolio > 1) {
@@ -665,6 +693,7 @@ public class UI extends Application {
 		Addbtn.getChildren().add(AddButton);
 		Addbtn.setAlignment(Pos.CENTER);
 		
+		// lots of formating 
 		DateInput.getChildren().addAll(Month,Day,Year);
 		DateInput.setAlignment(Pos.CENTER);
 		STOCKS.getChildren().addAll(NameText, StockNames);
@@ -681,45 +710,42 @@ public class UI extends Application {
 		stocks.getChildren().addAll(elements, Addbtn);
 	}
 	
-	// Make it check everything is correct before making the portfolio (Even the Dates)
-	public void CheckStocks(VBox AllStock) {
-		// Check if all input fields are filled
-		// Check if all the stocks inputed are valid inputs
+	// Checks that all the stocks are valid and then adds the portfolio to the user database
+	public void CheckStocks(VBox AllStock) {		
 		
+		// create a portfolio variable
 		ArrayList<OwnedStock> Portfolio = new ArrayList<OwnedStock>();
 		
+		// checks every stock the user entered
 		for (int i = 0; i < AllStock.getChildren().size() - 1; i++) {
 			HBox a = (HBox) AllStock.getChildren().get(i);
 			VBox b = (VBox) a.getChildren().get(0);
 			ComboBox<String> names = (ComboBox<String>) b.getChildren().get(1);
 			String name = names.getValue();
 			VBox c = (VBox) a.getChildren().get(1);
-			ComboBox<String> amounts = (ComboBox<String>) c.getChildren().get(1);
-			String amount = amounts.getValue();
+			ComboBox<Integer> amounts = (ComboBox<Integer>) c.getChildren().get(1);
+			int amount = amounts.getValue();
 			VBox d = (VBox) a.getChildren().get(2);
 			HBox e = (HBox) d.getChildren().get(1);
-			ComboBox<String> days = (ComboBox<String>) e.getChildren().get(0);
+			ComboBox<String> days = (ComboBox<String>) e.getChildren().get(1);
 			String day = days.getValue();
-			ComboBox<String> months = (ComboBox<String>) e.getChildren().get(1);
+			ComboBox<String> months = (ComboBox<String>) e.getChildren().get(0);
 			String month = months.getValue();
 			ComboBox<String> years = (ComboBox<String>) e.getChildren().get(2);
 			String year = years.getValue();
 			
-			Portfolio.add(new OwnedStock(name,name,amount,month+"/"+day+"/"+year));
+			Portfolio.add(new OwnedStock(name,name,amount,month,day,year));
 			
-			//System.out.println(name);
-			//System.out.println(amount);
-			//System.out.println(day);
-			//System.out.println(month);
-			//System.out.println(year);
 		}
 		person.createPortfolio(Portfolio);
+		UserManager.addUser(person.getName(), person.getPassword(), person.getAge(), person.getPortfolio());
 		LoadMainPage();
 	}
-			
-	public void LoadMainPage() {
-		// Get all the Buttons Working 
 		
+	// The main page of the program
+	public void LoadMainPage() {
+		
+		// Styling for the main page
 		String BaseButtonStyle ="-fx-text-fill: white;"+
 				"-fx-background-color:transparent;"+
 				"-fx-border-color:white;"+
@@ -765,14 +791,27 @@ public class UI extends Application {
 			    "-fx-font-family: Courier New;"+
 			    "-fx-font-size: 22;";
 		
+		String GreenTextStyle = "-fx-font: Times New Roman;"+
+				"-fx-fill: green;"+
+			    "-fx-font-family: Courier New;"+
+			    "-fx-font-size: 22;";
+		
+		String RedTextStyle = "-fx-font: Times New Roman;"+
+				"-fx-fill: red;"+
+			    "-fx-font-family: Courier New;"+
+			    "-fx-font-size: 22;";
+		
 		TimesinMainScene++;
 		
+		// This doesnt change from the main page
 		if (TimesinMainScene == 1) {
+			// Formating
 			VBox top = new VBox(10);
 			BorderPane topbtn = new BorderPane(), header = new BorderPane();
 			topbtn.setPadding(new Insets(15, 15, 15, 15));
 			HBox btns = new HBox(15);
 			
+			// Edit portfolio button
 			int EditPortFolioButtonSizeX = 200,EditPortFolioButtonSizeY = 45;
 			Button EditPortFolio = new Button("Edit Portfolio");
 			EditPortFolio.setStyle(BaseButtonStyle);
@@ -781,6 +820,7 @@ public class UI extends Application {
 			topbtn.setLeft(EditPortFolio);
 			EditPortFolio.setOnAction(e -> EditPortfolio());
 			
+			// Editer Personal information
 			int EditPersonalButtonSizeX = 200,EditPersonalButtonSizeY = 45;
 			Button EditPersonal = new Button("My Account");
 			EditPersonal.setStyle(BaseButtonStyle);
@@ -790,6 +830,7 @@ public class UI extends Application {
 			top.getChildren().add(topbtn);
 			EditPersonal.setOnAction(e -> LoadMyAccountScene());
 			
+			// Header
 			Text BlanksPortfolio = new Text(person.getName()+"'s Portfolio");
 			BlanksPortfolio.setLayoutY(50);
 			BlanksPortfolio.setLayoutX(InitialWidthScreen/2 - 200);
@@ -797,14 +838,17 @@ public class UI extends Application {
 			top.getChildren().add(BlanksPortfolio);
 			top.setAlignment(Pos.CENTER);
 			
+			// Seperator for the buttons
 			Separator separator1 = new Separator();
 			top.getChildren().add(separator1);
 			
+			// Vertical seperators
 			Separator sep1 = new Separator(), sep2 = new Separator(), sep3 = new Separator();
 			sep1.setOrientation(Orientation.VERTICAL);
 			sep2.setOrientation(Orientation.VERTICAL);
 			sep3.setOrientation(Orientation.VERTICAL);
 			
+			// Buttons for stock analysis 
 			int BigBtnSizeX = 300, BigBtnSizeY = 60;
 			Button MrkOvw = new Button("Market OverView"), AssesStock = new Button("Asses A Stock"), SearchStock = new Button("Seach for Stock"), PortfolioAssesment = new Button("Portfolio Assesment");
 			MrkOvw.setStyle(BigButtonBase);
@@ -827,18 +871,20 @@ public class UI extends Application {
 			btns.setAlignment(Pos.CENTER);
 			top.getChildren().add(btns);
 			
+			// Seperators for the buttons
 			Separator separator2 = new Separator();
 			top.getChildren().add(separator2);
 			
 			rootmainScene.setTop(top);
 		}
 		
+		//  grid for portfolio
 		GridPane grid = new GridPane(); 
 		grid.setPadding(new Insets(30, 10, 10, 10)); 
 		grid.setVgap(10); 
 	    grid.setHgap(40);
-	    //grid.setAlignment(Pos.CENTER); 
 	
+	    // Text for grids
 		Text name = new Text("Name"), quantity = new Text("Quantity"), Todayschange = new Text("Todays Change"), NetChange = new Text("Net Change"), CloserLook = new Text("Take a Closer Look");
 		name.setStyle(PageTextStyle);
 		grid.add(name, 0, 0);
@@ -856,11 +902,15 @@ public class UI extends Application {
 		grid.add(CloserLook, 4, 0);
 		grid.setHalignment(CloserLook, HPos.CENTER);
 		
+		// Loads the stocks in the portfolio locally
 		for (int i = 0; i < person.getPortfolio().getPortfolioSize(); i++) {
+			MetricCalculator data = new MetricCalculator(person.getPortfolio().GetStock(i).getName(), "3 Days");
+			DecimalFormat df = new DecimalFormat("###.###");
+			
 			Text N = new Text(person.getPortfolio().GetStock(i).getName());
-			Text Q = new Text(person.getPortfolio().GetStock(i).getShares());
-			Text TC = new Text("+4");
-			Text NC = new Text("+3");
+			Text Q = new Text(person.getPortfolio().GetStock(i).getShares()+"");
+			Text TC = new Text("$"+df.format(data.getTodayChange(person.getPortfolio().GetStock(i).getShares()))+"");
+			Text NC = new Text("$"+df.format(data.getNetChange(person.getPortfolio().GetStock(i).getMonth()+"/"+person.getPortfolio().GetStock(i).getDay()+"/20"+person.getPortfolio().GetStock(i).getYear(),person.getPortfolio().GetStock(i).getShares()))+"");
 			int bSizeX = 50, bSizeY = 15;
 			Button b = new Button(">");
 			
@@ -868,16 +918,22 @@ public class UI extends Application {
 			grid.setHalignment(N, HPos.CENTER);
 			Q.setStyle(PageTextStyle);
 			grid.setHalignment(Q, HPos.CENTER);
-			TC.setStyle(PageTextStyle);
+			if (data.getTodayChange(person.getPortfolio().GetStock(i).getShares()) > 0)
+				TC.setStyle(GreenTextStyle);
+			else 
+				TC.setStyle(RedTextStyle);
 			grid.setHalignment(TC, HPos.CENTER);
-			NC.setStyle(PageTextStyle);
+			if (data.getNetChange(person.getPortfolio().GetStock(i).getMonth()+"/"+person.getPortfolio().GetStock(i).getDay()+"/20"+person.getPortfolio().GetStock(i).getYear(),person.getPortfolio().GetStock(i).getShares()) > 0)
+				NC.setStyle(GreenTextStyle);
+			else 
+				NC.setStyle(RedTextStyle);
 			grid.setHalignment(NC, HPos.CENTER);
 			b.setStyle(BaseButtonStyle);
 			grid.setHalignment(b, HPos.CENTER);
 			b.setPrefSize(bSizeX,bSizeY);
 			HoverListener(b,BaseButtonStyle,HoverButtonStyle);
 			int k = i;
-			b.setOnAction(e -> LoadSpecificStockPage(person.getPortfolio().GetStock(k).getName(), person.getPortfolio().GetStock(k).getShares(), person.getPortfolio().GetStock(k).getPurchased()));
+			b.setOnAction(e -> LoadSpecificStockPage(person.getPortfolio().GetStock(k).getName(), person.getPortfolio().GetStock(k).getShares(),"3 Days"));
 			
 			grid.add(N, 0, i+1);
 			grid.add(Q, 1, i+1);
@@ -887,18 +943,21 @@ public class UI extends Application {
 			
 		}
 
+		// centers the grid
 		grid.setAlignment(Pos.TOP_CENTER);
 		rootmainScene.setCenter(grid);
 		
+		// sets the background of the scene to black
 		rootmainScene.setStyle("-fx-background-color: black");
 		if (TimesinMainScene == 1)
 			MainScene = new Scene(rootmainScene, InitialWidthScreen, InitialHeightScreen);
 		window.setScene(MainScene);
-	}	// Fix Date Things but besides that it works?
+	}
 	
+	// Editing the Portfolio from the main page
 	public void EditPortfolio() {
-		// Make Possible to Scroll Down Stocks
 
+		// Styling the text
 		String BaseButtonStyle ="-fx-text-fill: white;"+
 				"-fx-background-color:transparent;"+
 				"-fx-border-color:white;"+
@@ -925,8 +984,8 @@ public class UI extends Application {
 		
 		TimesinEditPortfolioScene++;
 		
+		// Formating 
 		rootmainScene.setCenter(null);
-		
 		BorderPane root = new BorderPane();
 		VBox Top = new VBox(15);
 		Top.setAlignment(Pos.CENTER);
@@ -934,8 +993,7 @@ public class UI extends Application {
 		SubTopRight.setPadding(new Insets(15, 15, 15, 15));
 		VBox stocks = new VBox(5);
 		
-		int StocksInPorfolio = 0;
-		
+		// Continue Button
 		int ContinueButtonSizeX = 150,ContinueButtonSizeY = 45;
 		Button Continue = new Button("Done");
 		Continue.setStyle(BaseButtonStyle);
@@ -945,26 +1003,28 @@ public class UI extends Application {
 		Top.getChildren().add(SubTopRight);
 		Continue.setOnAction(e -> UpDatePortfolio(stocks));
 		
+		// Header for page
 		Text Header = new Text("Edit Portfolio");
 		Header.setStyle(HeaderTextStyle);
 		SubTopCenter.setCenter(Header);
 		Top.getChildren().add(SubTopCenter);
-		
 		root.setTop(Top);
-		
+			
+		// Adds stocks to the porftolio
 		LoadStocksInEditPortfolio(stocks);
-
 		root.setCenter(stocks);
 		root.setStyle("-fx-background-color: black");
-		if (TimeinOnboardScene == 1)
+
+		// Checks if its the first time in the 
+		if (TimesinEditPortfolioScene == 1)
 			EditPortfolioScene = new Scene(root, InitialWidthScreen, InitialHeightScreen);
 		window.setScene(EditPortfolioScene);
 	}	
 	
+	// creates a new stock in the portfolio
 	public void LoadStocksInEditPortfolio(VBox stocks) {
-		// Fix the boarder for adding another Stock so that it is trim to the input information
-		// The Dates will not be initialized because wtf with formating
 		
+		// Text Style
 		String BaseButtonStyle ="-fx-text-fill: white;"+
 				"-fx-background-color:transparent;"+
 				"-fx-border-color:white;"+
@@ -996,8 +1056,10 @@ public class UI extends Application {
                 "-fx-border-radius: 5;" + 
                 "-fx-border-color: white;";
 		
+		// Loads a new stocks
 		for (int a = 0; a < person.getPortfolio().getPortfolioSize(); a++) {
-		
+
+			// formating
 			HBox elements = new HBox(15);
 			VBox STOCKS = new VBox(5);
 			VBox AMOUNT = new VBox(5);
@@ -1011,19 +1073,13 @@ public class UI extends Application {
 			NameText.setStyle(StockTextStyle);
 			NameText.toFront();
 			
-			// Stock Searcher
-			String[] SN = null;
-			try {
-				SN = OpenFile("TopUSCompanies.txt");
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+			// calls from the stock database to 
+			StockDatabase data = new StockDatabase();
 			ComboBox<String> StockNames = new ComboBox<>();
 			StockNames.setTooltip(new Tooltip());
-			StockNames.getItems().addAll(SN);
+			StockNames.getItems().addAll(data.getAllStockNames());
 			new ComboBoxSearcher<String>(StockNames);
-			StockNames.setValue(person.getPortfolio().GetStock(a).getName());
+			StockNames.getSelectionModel().selectFirst();
 			
 			// Quantity Text Parameters
 			Text QuantityText = new Text("Amount Purchased");
@@ -1031,15 +1087,15 @@ public class UI extends Application {
 			QuantityText.toFront();
 			
 			// TextBox for Amount of Stocks	
-			ComboBox<String> QuantityBox = new ComboBox<>();
+			ComboBox<Integer> QuantityBox = new ComboBox<>();
 			String[] Quantity = new String[1000];
 			for (int j = 1; j <= 1000 ; j++) {
-				QuantityBox.getItems().add(j+"");
+				QuantityBox.getItems().add(j);
 			}
 			QuantityBox.setValue(person.getPortfolio().GetStock(a).getShares());
 			
 			// Date Text Parameters;
-			Text DatePurchasedText = new Text("Date Purchased");
+			Text DatePurchasedText = new Text("Date Purchased(MM,DD,YY)");
 			DatePurchasedText.setStyle(StockTextStyle);
 			DatePurchasedText.toFront();
 			
@@ -1057,7 +1113,7 @@ public class UI extends Application {
 			for (int i = 0; i < Months.length; i++) {
 				Month.getItems().add(Months[i]);
 			}
-			//Month.setValue(person.getPortfolio().GetStock(a).getPurchased()
+			Month.setValue(person.getPortfolio().GetStock(a).getMonth());
 
 			// Day
 			ComboBox<String> Day = new ComboBox<>();
@@ -1069,10 +1125,11 @@ public class UI extends Application {
 					k = "" + j;
 				Day.getItems().add(k);
 			}
+			Day.setValue(person.getPortfolio().GetStock(a).getDay());
 			
 			// Year
 			ComboBox<String> Year = new ComboBox<>();
-			for (int k = 00; k <= 19 ; k++) {
+			for (int k = 15; k <= 19 ; k++) {
 				String j;
 				if (k < 10)
 					j = "0"+k;
@@ -1080,7 +1137,9 @@ public class UI extends Application {
 					j = "" + k;
 				Year.getItems().add(j);
 			}
+			Year.setValue(person.getPortfolio().GetStock(a).getYear());
 			
+			// Lots of formating
 			DateInput.getChildren().addAll(Month,Day,Year);
 			DateInput.setAlignment(Pos.CENTER);
 			STOCKS.getChildren().addAll(NameText, StockNames);
@@ -1110,44 +1169,47 @@ public class UI extends Application {
 			}
 		}
 	}
-	
+
+	// Updates the portfolio once
 	public void UpDatePortfolio (VBox AllStock) {
-		// Update the portfolio in the DataBase
-		// Check to make sure all fields are correct
-		
+
 		ArrayList<OwnedStock> Portfolio = new ArrayList<OwnedStock>();
 		
+		// finds the information about the stock from the VBox
 		for (int i = 0; i < AllStock.getChildren().size() - 1; i++) {
 			HBox a = (HBox) AllStock.getChildren().get(i);
 			VBox b = (VBox) a.getChildren().get(0);
 			ComboBox<String> names = (ComboBox<String>) b.getChildren().get(1);
 			String name = names.getValue();
 			VBox c = (VBox) a.getChildren().get(1);
-			ComboBox<String> amounts = (ComboBox<String>) c.getChildren().get(1);
-			String amount = amounts.getValue();
+			ComboBox<Integer> amounts = (ComboBox<Integer>) c.getChildren().get(1);
+			int amount = amounts.getValue();
 			VBox d = (VBox) a.getChildren().get(2);
 			HBox e = (HBox) d.getChildren().get(1);
-			ComboBox<String> days = (ComboBox<String>) e.getChildren().get(0);
+			ComboBox<String> days = (ComboBox<String>) e.getChildren().get(1);
 			String day = days.getValue();
-			ComboBox<String> months = (ComboBox<String>) e.getChildren().get(1);
+			ComboBox<String> months = (ComboBox<String>) e.getChildren().get(0);
 			String month = months.getValue();
 			ComboBox<String> years = (ComboBox<String>) e.getChildren().get(2);
 			String year = years.getValue();
 			
-			Portfolio.add(new OwnedStock(name,name,amount,month+"/"+day+"/"+year));
+			Portfolio.add(new OwnedStock(name,name,amount,month,day,year));
 			
 		}
+		// uptdates the userdatabase
+		Portfolio port = new Portfolio(Portfolio);
+		UserManager.updatePortfolio(person.getName(),port);
 		
+		// updates it locally
 		person.setPortfolio(person.CreateNewPortfolio(Portfolio));
 		LoadMainPage();
 	}
-	
+
+	// creates a new scene to update user information
 	public void LoadMyAccountScene () {
-		// Make look more professional
-		// Add Rules for password
 		
 		rootmainScene.setCenter(null);
-		
+		// Styling for button
 		String BaseButtonStyle ="-fx-text-fill: white;"+
 				"-fx-background-color:transparent;"+
 				"-fx-border-color:white;"+
@@ -1272,6 +1334,7 @@ public class UI extends Application {
 		window.setScene(MyAccountScene);
 	}
 	
+	// refreshes the page
 	public void leaveAccountPage(TextField NameBox,ComboBox <Integer> AgeSelection, TextField PasswordBox) {
 		AgeSelection.setValue(person.getAge());
 		NameBox.setText(person.getName());
@@ -1280,7 +1343,9 @@ public class UI extends Application {
 		LoadMainPage();
 	}	
 	
+	// updates the user information in the program
 	public void UpdateUser(VBox root,TextField NameBox,ComboBox <Integer> AgeSelection, TextField PasswordBox) {
+		// stykling
 		String ErrorTextStyle = "-fx-font: Courier New;"+
 			    "-fx-font-family: Courier New;"+
 			    "-fx-font-size: 15;"+
@@ -1288,27 +1353,39 @@ public class UI extends Application {
 		
 		TimesUpdatingUser++;
 		
+		// checks how many times the user tries to update user
 		if (TimesUpdatingUser > 1) {
 			if (root.getChildren().size() == 7)
 				root.getChildren().remove(6);
 		}
 		
+		// checks for empty boxes
 		if (NameBox.getText().trim().isEmpty() || PasswordBox.getText().trim().isEmpty()) {
 			Text Error = new Text("You must fill out all the fields");
 			Error.setStyle(ErrorTextStyle);
 			root.getChildren().add(Error);
 		}
+		
+		// Checks for uderage
 		else if (AgeSelection.getValue() < 18) {
 			Text Error = new Text("User must be 18 years or older");
 			Error.setStyle(ErrorTextStyle);
 			root.getChildren().add(Error);
 		}
+		
+		// updates user information
 		else {
-			// Update this in the DataBase
+			// updates information in the database
+			UserManager.updateAge(person.getName(), AgeSelection.getValue());
+			UserManager.updateName(person.getName(), NameBox.getText());
+			UserManager.updatePassword(person.getName(), PasswordBox.getText());
+
+			// updates the user information locally
 			person.setName(NameBox.getText());
 			person.setAge(AgeSelection.getValue());
 			person.setPassword(PasswordBox.getText());
 
+			// formating
 			VBox top = (VBox) rootmainScene.getTop();
 			Text name = (Text) top.getChildren().get(1);
 			name.setText(person.getName()+"'s Portfolio");
@@ -1316,8 +1393,10 @@ public class UI extends Application {
 		}
 	}
 
+	// looks at portfolio and recommends updating it
 	public void PortfolioAssesment() {
 		
+		// Styling the scene
 		String BaseButtonStyle ="-fx-text-fill: white;"+
 				"-fx-background-color:transparent;"+
 				"-fx-border-color:white;"+
@@ -1344,12 +1423,13 @@ public class UI extends Application {
 		
 		TimesinPortfolioAssesmentScene++;
 		
+		// formating
 		rootmainScene.setCenter(null);
-		
 		BorderPane root = new BorderPane();
 		BorderPane backbtn = new BorderPane();
 		backbtn.setPadding(new Insets(15,15,15,15));
 		
+		// back button
 		int BackButtonSizeX = 150,BackButtonSizeY = 45;
 		Button back = new Button("Back");
 		back.setPrefSize(BackButtonSizeX, BackButtonSizeY);
@@ -1359,6 +1439,7 @@ public class UI extends Application {
 		backbtn.setLeft(back);
 		root.setTop(backbtn);
 		
+		// text
 		Text UC = new Text("This Page is currently Under Construction");
 		UC.setStyle(HeaderTextStyle);
 		root.setCenter(UC);
@@ -1370,8 +1451,10 @@ public class UI extends Application {
 		window.setScene(PortfolioAssesmentScene);
 	}	
 
-	// Still Gotta Get It to Work
+	// Stock Searching page
 	public void SearchAStock() {
+		
+		// Styling for page
 		String BaseButtonStyle ="-fx-text-fill: white;"+
 				"-fx-background-color:transparent;"+
 				"-fx-border-color:white;"+
@@ -1404,19 +1487,21 @@ public class UI extends Application {
 		
 		TimesinSearchAStockScene++;
 		
+		// Formating
 		rootmainScene.setCenter(null);
-		
 		BorderPane root = new BorderPane();
 		VBox top = new VBox(10);
 		top.setAlignment(Pos.CENTER);
 		BorderPane backbtn = new BorderPane();
 		backbtn.setPadding(new Insets(15, 15, 15, 15));
 		
+		// creating the comboboxes for the page
 		ComboBox <String> OutLookSelection = new ComboBox<String>();
 		ComboBox <String> SectorSelection = new ComboBox<String>();
-		ComboBox <Double> PriceMin = new ComboBox<Double>();
-		ComboBox <Double> PriceMax = new ComboBox<Double>();
+		ComboBox <Integer> PriceMin = new ComboBox<Integer>();
+		ComboBox <Integer> PriceMax = new ComboBox<Integer>();
 		
+		// Back Button
 		int BackButtonSizeX = 150,BackButtonSizeY = 45;
 		Button back = new Button("Back");
 		back.setPrefSize(BackButtonSizeX, BackButtonSizeY);
@@ -1426,57 +1511,61 @@ public class UI extends Application {
 		backbtn.setLeft(back);
 		top.getChildren().add(backbtn);
 		
+		// Header
 		Text Header = new Text("Search For A Stock");
 		Header.setStyle(HeaderTextStyle);
 		top.getChildren().add(Header);
 		
+		// Formating
 		VBox elements = new VBox(20);
-		elements.setAlignment(Pos.CENTER);
+		elements.setAlignment(Pos.TOP_CENTER);
 		HBox textinput = new HBox(50);
 		VBox text = new VBox(30);
 		VBox input = new VBox(30);
 
+		// Prompts for the user
 		Text OL = new Text("Outlook: "), ST = new Text("Sector: "), PMin = new Text("Min Price: "), PMax = new Text("Max Price: ");
 		OL.setStyle(BodyTextStyle);
 		ST.setStyle(BodyTextStyle);
 		PMin.setStyle(BodyTextStyle);
 		PMax.setStyle(BodyTextStyle);
 		text.getChildren().addAll(OL,ST,PMin,PMax);
-		
 		textinput.getChildren().add(text);
 	
-		// Add all of the possibilities
+		// Adding the Outlook
 		OutLookSelection.getItems().addAll("3 Days", "1 Week", "1 Month", "3 Months");
 		OutLookSelection.setValue("3 Days");
 	
-		// Add all of the possibilities
+		// Adding all the Sectors
 		SectorSelection.getItems().addAll("Telecommunication Services", "Financial Services", "Information Technology", "Materials", "HealthCare", "Utilities", "Real Estate", "Industrials", "Energy", "Consumer Staples", "Consumer Discretionary");
 		SectorSelection.setValue("Telecommunication Services");
 
-		for (double i = 0; i <= 3000; i++) {
+		// Adding the prices to the scene
+		for (int i = 0; i <= 3000; i++) {
 			PriceMin.getItems().add(i);
 			PriceMax.getItems().add(i);
 		}
-		PriceMin.setValue(0.0);
-		PriceMax.setValue(3000.0);
+		
+		// Setting the price values initially
+		PriceMin.setValue(0);
+		PriceMax.setValue(3000);
 		input.getChildren().addAll(OutLookSelection,SectorSelection,PriceMin,PriceMax);
 		
+		// Formating
 		textinput.getChildren().add(input);
 		textinput.setAlignment(Pos.CENTER);
 		elements.getChildren().add(textinput);
 
+		// Search button 
 		int SearchButtonSizeX = 150, SearchButtonSizeY = 45;
 		Button search = new Button("Search");
 		search.setPrefSize(SearchButtonSizeX, SearchButtonSizeY);
 		search.setStyle(BaseButtonStyle);
 		HoverListener(search,BaseButtonStyle,HoverButtonStyle);
-		search.setOnAction(e -> SearchStocks(OutLookSelection.getValue(),SectorSelection.getValue(),PriceMin.getValue(),PriceMax.getValue()));
-		elements.getChildren().add(search);
-		
-		// This is Da Grid
-		GridPane grid = new GridPane();
-		
-		
+		search.setOnAction(e -> SearchStocks(elements,OutLookSelection.getValue(),SectorSelection.getValue(),PriceMin.getValue(),PriceMax.getValue()));
+		elements.getChildren().addAll(search);
+
+		// Formating
 		root.setTop(top);
 		root.setCenter(elements);
 		root.setStyle("-fx-background-color: black");
@@ -1486,22 +1575,99 @@ public class UI extends Application {
 		window.setScene(SearchAStockScene);
 	}
 	
-	public void SearchStocks(String outlook, String sector, double min, double max) {
-		// check some things before doind the search but it will do a search
+	// Adds stocks that we Searched for to the Scene
+	public void SearchStocks(VBox elements,String outlook, String sector, int min, int max) {
+		
+		// Styling
+		String BodyTextStyle = "-fx-font: Times New Roman;"+
+				"-fx-fill: white;"+
+			    "-fx-font-family: Courier New;"+
+			    "-fx-font-weight: bold;"+
+			    "-fx-font-size: 25;";
+		
+		GridPane grid = new GridPane();
+		
+		// Checks for Max > min
+		if (max > min) {
+			TimeSearchingStock++;
+			
+			// Removes any unnecessary nodes on the screen
+			if (TimeSearchingStock > 1) 
+				elements.getChildren().remove(elements.getChildren().size()-1);
+			
+			// Searches for stocks
+			StockSearch search = new StockSearch(sector,outlook,min,max);
+			String[][] stocks = search.search();
+
+			// Spacing
+			grid.setVgap(10);
+			grid.setHgap(45);
+			grid.setPadding(new Insets (15,15,15,15));
+			
+			// text for searching
+			Text info1 = new Text("Name");
+			info1.setStyle(BodyTextStyle);
+			Text info2 = new Text("Recommendation");
+			info2.setStyle(BodyTextStyle);
+			Text info3 = new Text("Today's Change");
+			info3.setStyle(BodyTextStyle);
+			grid.add(info1, 1, 0);
+			grid.add(info2, 2, 0);
+			grid.add(info3, 3, 0);
+			
+			// Adds stock information
+			for (int i = 1; i < 4; i++) {
+				
+				// Adds the number
+				Text Stocknum = new Text(""+i);
+				Stocknum.setStyle(BodyTextStyle);
+				grid.add(Stocknum, 0, i+1);
+				
+				// Adds the Stock name
+				Text StockName = new Text(stocks[i-1][0]);
+				StockName.setStyle(BodyTextStyle);
+				grid.add(StockName, 1, i+1);
+				
+				// Adds our recommendation
+				Text StockRec = new Text(stocks[i-1][1]);
+				StockRec.setStyle(BodyTextStyle);
+				grid.add(StockRec, 2, i+1);
+				
+				// Adds the net change
+				Text StockChange = new Text(stocks[i-1][2]);
+				StockChange.setStyle(BodyTextStyle);
+				grid.add(StockChange, 3, i+1);
+				
+			}
+			
+			// Formating
+			grid.setAlignment(Pos.CENTER);
+			elements.getChildren().add(grid);
+
+		}
+		
 	}
 	
-	public void LeaveSearchAStock(ComboBox <String> OutLookSelection, ComboBox <String> SectorSelection, ComboBox <Double> PriceMin, ComboBox <Double> PriceMax) {
+	// Resets the Stock search pgae
+	public void LeaveSearchAStock(ComboBox <String> OutLookSelection, ComboBox <String> SectorSelection, ComboBox <Integer> PriceMin, ComboBox <Integer> PriceMax) {
+		// Resets the boxes
 		OutLookSelection.setValue("3 Days");
 		SectorSelection.setValue("Telecommunication Services");
-		PriceMin.setValue(0.0);
-		PriceMax.setValue(3000.0);
+		PriceMin.setValue(0);
+		PriceMax.setValue(3000);
 		
-		// Also Unload Searched Stocks
-		
+		// Reloads the main page
 		LoadMainPage();
 	}
-	
+
+	// Assess all the sectors in the market and shows speck about it
 	public void LoadMarketAssesment() {
+		
+		// Grabs sector information
+		Object[] sectorinfo;
+		sectorinfo = imports.getSectorInfo();
+		
+		// Scene Styling
 		String BaseButtonStyle ="-fx-text-fill: white;"+
 				"-fx-background-color:transparent;"+
 				"-fx-border-color:white;"+
@@ -1532,15 +1698,29 @@ public class UI extends Application {
 			    "-fx-font-weight: bold;"+
 			    "-fx-font-size: 20;";
 		
+		String GreenTextStyle = "-fx-font: Times New Roman;"+
+				"-fx-fill: green;"+
+			    "-fx-font-family: Courier New;"+
+			    "-fx-font-weight: bold;"+
+			    "-fx-font-size: 20;";
+		
+		String RedTextStyle = "-fx-font: Times New Roman;"+
+				"-fx-fill: red;"+
+			    "-fx-font-family: Courier New;"+
+			    "-fx-font-weight: bold;"+
+			    "-fx-font-size: 20;";
+		
 		TimesinMarketAssesmentScene++;
 		
+		// Formatting for page
 		rootmainScene.setCenter(null);
-		
 		BorderPane root = new BorderPane();
 		BorderPane backbtn = new BorderPane();
 		backbtn.setPadding(new Insets(15,15,15,15));
 		VBox top = new VBox();
 		top.setAlignment(Pos.CENTER);
+		
+		// Back Button
 		int BackButtonSizeX = 150,BackButtonSizeY = 45;
 		Button back = new Button("Back");
 		back.setPrefSize(BackButtonSizeX, BackButtonSizeY);
@@ -1550,34 +1730,60 @@ public class UI extends Application {
 		backbtn.setLeft(back);
 		top.getChildren().add(backbtn);
 		
+		// Header for Page
 		Text Header = new Text("Market Assesment");
 		Header.setStyle(HeaderTextStyle);
 		top.getChildren().add(Header);
-		
 		root.setTop(top);
 		
+		// Creating a Grid and formating it
 		GridPane grid = new GridPane();
 		grid.setVgap(10);
 		grid.setHgap(15);
 		grid.setPadding(new Insets(50, 10, 10, 10));
-		Text day = new Text("Day");
-		day.setStyle(PageTextStyle);
-		grid.add(day, 1,0);
-		Text week = new Text("Week");
-		week.setStyle(PageTextStyle);
-		grid.add(week, 2,0);
+		Text oneday = new Text("1 Day");
+		oneday.setStyle(PageTextStyle);
+		grid.add(oneday, 1,0);
+		Text fiveday = new Text("5 Day");
+		fiveday.setStyle(PageTextStyle);
+		grid.add(fiveday, 2,0);
 		Text month = new Text("Month");
 		month.setStyle(PageTextStyle);
 		grid.add(month, 3,0);
-		Text ytd = new Text("Year to Date");
+		Text threemonth = new Text("3 Month");
+		threemonth.setStyle(PageTextStyle);
+		grid.add(threemonth, 4,0);
+		Text ytd = new Text("YTD");
 		ytd.setStyle(PageTextStyle);
-		grid.add(ytd, 4,0);
+		grid.add(ytd, 5,0);
+		Text oneyear = new Text("1 year");
+		oneyear.setStyle(PageTextStyle);
+		grid.add(oneyear, 6,0);
 		
+		// loads information into the grid
+		for (int i = 0; i < 22; i++) {
+			if (i%2 == 0) {
+				Text sector = new Text((String)sectorinfo[i]);
+				sector.setStyle(PageTextStyle);
+				grid.add(sector,0,i/2+1);
+			}
+			else {
+				ArrayList <Float> info = (ArrayList <Float>) sectorinfo[i];
+				for (int k = 1; k <= 6; k++) {
+					Text data = new Text(info.get(k)+"%");
+					if (info.get(k)>0)
+						data.setStyle(GreenTextStyle);
+					else 
+						data.setStyle(RedTextStyle);
+					grid.add(data, k, i/2+1);
+				}
+			}
+
+		}
+		
+		//formating
 		grid.setAlignment(Pos.TOP_CENTER);
-		root.setCenter(grid);
-		
-		// Just add information here and greed/red thing
-		
+		root.setCenter(grid);		
 		root.setStyle("-fx-background-color: black");
 		if (TimesinMarketAssesmentScene == 1) {
 			MarketAssesmentScene = new Scene(root, InitialWidthScreen, InitialHeightScreen);
@@ -1585,8 +1791,10 @@ public class UI extends Application {
 		window.setScene(MarketAssesmentScene);
 	}
 
-	public void LoadSpecificStockPage(String name, String amount, Date Date) {
+	// loads the specific stock page
+	public void LoadSpecificStockPage(String name, int amount, String Outlook) {
 		
+		// page styling
 		String BackButtonStyle ="-fx-text-fill: white;"+
 				"-fx-background-color:transparent;"+
 				"-fx-border-color:white;"+
@@ -1633,27 +1841,19 @@ public class UI extends Application {
 				"-fx-fill: white;"+
 			    "-fx-font-family: Courier New;"+
 			    "-fx-font-weight: bold;"+
-			    "-fx-font-size: 50;";
-		
-		String TextFieldStyle = "-fx-font-family: Quicksand;"+
-				"-fx-font-size: 18;"+
-				"-fx-padding: 1,1,1,1;"+
-				"-fx-border-color: white;"+
-				"-fx-border-width: 2;"+
-				"-fx-border-radius: 1;"+
-				"-fx-border: white;"+
-				"-fx-background-color: transparent;"+
-				"-fx-text-fill: white;";
+			    "-fx-font-size: 20;";
 		
 		TimesinSpecificStockScene++;
 		
+		// formating
 		rootmainScene.setCenter(null);
-		
 		BorderPane root = new BorderPane();
 		BorderPane backbtn = new BorderPane();
 		backbtn.setPadding(new Insets(15,15,15,15));
 		VBox top = new VBox();
 		top.setAlignment(Pos.CENTER);
+		
+		// Back Button
 		int BackButtonSizeX = 150,BackButtonSizeY = 45;
 		Button back = new Button("Back");
 		back.setPrefSize(BackButtonSizeX, BackButtonSizeY);
@@ -1663,125 +1863,114 @@ public class UI extends Application {
 		backbtn.setLeft(back);
 		top.getChildren().add(backbtn);
 		
+		// Header for page
 		Text Header = new Text(name);
 		Header.setStyle(HeaderTextStyle);
 		top.getChildren().add(Header);
 
-		VBox info = new VBox();
+		// formating for page
+		VBox info = new VBox(10);
 		HBox outlookforGraph = new HBox(25);
 		outlookforGraph.setAlignment(Pos.CENTER);
-		
 		Text OL = new Text("Outlook:");
 		OL.setStyle(PageTextStyle);
 		
+		// Creates an outlook comboBox
 		ComboBox <String> OutLookSelection = new ComboBox<String>();
 		OutLookSelection.getItems().addAll("3 Days", "1 Week", "1 Month", "3 Months");
 		OutLookSelection.setValue("3 Days");
 		
+		// Creates a Submit button
 		int SubmitButtonSizeX = 120,SubmitButtonSizeY = 35;
 		Button submit = new Button("Submit");
 		submit.setPrefSize(SubmitButtonSizeX, SubmitButtonSizeY);
 		submit.setStyle(BackButtonStyle);
 		HoverListener(submit,BackButtonStyle,BackHoverButtonStyle);
-		//submit.setOnAction(e -> True);
-		
+		submit.setOnAction(e -> LoadSpecificStockPage(name,amount,OutLookSelection.getValue()));
 		outlookforGraph.getChildren().addAll(OL,OutLookSelection,submit);
 		info.getChildren().add(outlookforGraph);
 		
-		// Graph Should Go here
+		// Gets Values for the graph
+		StockAnalysis data1 = new StockAnalysis(name,Outlook);
+        MetricCalculator data = new MetricCalculator(name,Outlook);
+        String[] Xvals = data.getPriceGraphX();
+        Double[] Yvals = data.getPriceGraphY();
+		
+        // Creates a graph
 		final NumberAxis xAxis = new NumberAxis();
         final NumberAxis yAxis = new NumberAxis();
-        xAxis.setLabel("Number of Month");
+        xAxis.setLabel("Days");
         yAxis.setLabel("Dollars");
         //creating the chart
         final LineChart<Number,Number> lineChart = 
                 new LineChart<Number,Number>(xAxis,yAxis);
                 
-        lineChart.setTitle(name+"'s Graph");
+        lineChart.setTitle(name+"'s Price Graph");
         //defining a series
         XYChart.Series series = new XYChart.Series();
         series.setName("My portfolio");
-        //populating the series with data
-        series.getData().add(new XYChart.Data(1, 23));
-        series.getData().add(new XYChart.Data(2, 14));
-        series.getData().add(new XYChart.Data(3, 15));
-        series.getData().add(new XYChart.Data(4, 24));
-        series.getData().add(new XYChart.Data(5, 34));
-        series.getData().add(new XYChart.Data(6, 36));
-        series.getData().add(new XYChart.Data(7, 22));
-        series.getData().add(new XYChart.Data(8, 45));
-        series.getData().add(new XYChart.Data(9, 43));
-        series.getData().add(new XYChart.Data(10, 17));
-        series.getData().add(new XYChart.Data(11, 29));
-        series.getData().add(new XYChart.Data(12, 25));
         
+        //populating the series with data
+        for (int i = 0; i < Xvals.length; i++) {
+        	series.getData().add(new XYChart.Data(i+1, Yvals[i]));
+        }
+        xAxis.setAutoRanging(false);
+        xAxis.setLowerBound(1);
+        xAxis.setUpperBound(Xvals.length);
+        xAxis.setTickUnit(1);
+        yAxis.setAutoRanging(false);
+        yAxis.setLowerBound(data.getThreeMonthLow());
+        yAxis.setUpperBound(data.getThreeMonthHigh());
+        yAxis.setTickUnit(2);
         lineChart.getData().add(series);
         lineChart.setPrefSize(500, 300);
         
         info.getChildren().add(lineChart);
 		
-        TextField populate = new TextField();
+        // Adds a Text Box and buttons for definitions
+        Text populate = new Text();
+        DecimalFormat df = new DecimalFormat("###.###");
+        populate.wrappingWidthProperty().bind(window.widthProperty());
         HBox btns = new HBox(15);
         int LearningButtonSizeX = 150,LearningButtonSizeY = 45;
         Button PCBTN = new Button("Previous \nClose"), ThreeMRBTN = new Button("Three Month \nRange"), PEBTN = new Button("Price to \nEarnings Ratio"), MMBTN = new Button("Market \nMomentum"), RSIBTN = new Button("Relative \nStrength Index"), EMABTN = new Button("Exponential \nMoving Average"), OurRecBTN = new Button("Our \nReccomendation");
         PCBTN.setPrefSize(LearningButtonSizeX, LearningButtonSizeY);
         PCBTN.setStyle(BaseButtonStyle);
         HoverListener(PCBTN,BaseButtonStyle,HoverButtonStyle);
-        PCBTN.setOnAction(e -> populate.setText("e"));
+        PCBTN.setOnAction(e -> populate.setText("Price: "+df.format(data.getPrevClose())+"\nDefinition: "+data.getPriceDefinition()));
         ThreeMRBTN.setPrefSize(LearningButtonSizeX, LearningButtonSizeY);
         ThreeMRBTN.setStyle(BaseButtonStyle);
         HoverListener(ThreeMRBTN,BaseButtonStyle,HoverButtonStyle);
-        ThreeMRBTN.setOnAction(e -> populate.setText("a"));
+        ThreeMRBTN.setOnAction(e -> populate.setText("Three Month High: "+df.format(data.getThreeMonthHigh())+"\nThree Month Low: "+df.format(data.getThreeMonthLow())+"\nDefinition: "+data.getPriceDefinition()));
         PEBTN.setPrefSize(LearningButtonSizeX, LearningButtonSizeY);
         PEBTN.setStyle(BaseButtonStyle);
         HoverListener(PEBTN,BaseButtonStyle,HoverButtonStyle);
-        PEBTN.setOnAction(e -> populate.setText("b"));
+        PEBTN.setOnAction(e -> populate.setText("P/E: "+df.format(data.getPERatio())+"\nDefinition: "+data.getPERatioDefinition()));
         MMBTN.setPrefSize(LearningButtonSizeX, LearningButtonSizeY);
         MMBTN.setStyle(BaseButtonStyle);
         HoverListener(MMBTN,BaseButtonStyle,HoverButtonStyle);
-        MMBTN.setOnAction(e -> populate.setText("OFsadc"));
+        MMBTN.setOnAction(e -> populate.setText("Market Momentum: "+df.format(data.getMomentum(data.getOutlook()))+"\nDefinition: "+data.getMomentumDefinition()));
         RSIBTN.setPrefSize(LearningButtonSizeX, LearningButtonSizeY);
         RSIBTN.setStyle(BaseButtonStyle);
         HoverListener(RSIBTN,BaseButtonStyle,HoverButtonStyle);
-        RSIBTN.setOnAction(e -> populate.setText("D"));
+        RSIBTN.setOnAction(e -> populate.setText("RSI: "+df.format(data.getRSI())+"\nDefinition: "+data.getRSIDefinition()));
         EMABTN.setPrefSize(LearningButtonSizeX, LearningButtonSizeY);
         EMABTN.setStyle(BaseButtonStyle);
         HoverListener(EMABTN,BaseButtonStyle,HoverButtonStyle);
-        EMABTN.setOnAction(e -> populate.setText("CMSAC"));
+        EMABTN.setOnAction(e -> populate.setText("EMA: "+df.format(data.getEMA(data.getOutlook()))+"\nDefinition: "+data.getEMADefinition()));
         OurRecBTN.setPrefSize(LearningButtonSizeX, LearningButtonSizeY);
         OurRecBTN.setStyle(BaseButtonStyle);
         HoverListener(OurRecBTN,BaseButtonStyle,HoverButtonStyle);
-        OurRecBTN.setOnAction(e -> populate.setText("Michael"));
+        OurRecBTN.setOnAction(e -> populate.setText("Our Reccomendation: "+data1.conclusion()));
         btns.getChildren().addAll(PCBTN,ThreeMRBTN,PEBTN,MMBTN,RSIBTN,EMABTN,OurRecBTN);
         btns.setAlignment(Pos.CENTER);
         
+        // Formating
         info.getChildren().add(btns);
-        
-        int sizeX = 100, SizeY = 200;
-		populate.setPrefSize(sizeX, SizeY);
-		populate.setStyle(TextFieldStyle);
+		populate.setStyle(PageTextStyle);
 		info.getChildren().add(populate);
-		
-		//info.getChildren().addAll(PC,ThreeMR,PE,MM,RSI,EMA,OurRec,News);
-		//SSroot.setLeft(SubrootParameters);
-		
-		/*
-		Text PCData = new Text(""+new DecimalFormat("$#.00").format(apple.getPrevClose())), ThreeMRData = new Text(""+new DecimalFormat("$#.00").format(apple.getThreeMonthLow(62))+ ", "+new DecimalFormat("$#.00").format(apple.getThreeMonthHigh(62))), PEData = new Text(""+new DecimalFormat("$#.00").format(apple.calcPERatio())), MMData = new Text(""+new DecimalFormat("$#.00").format(apple.calcMomentum(0, 21))), RSIData = new Text(""+new DecimalFormat("$#.00").format(apple.calcRSI(21))), EMAData = new Text(""+new DecimalFormat("$#.00").format(apple.calcEMA(21))), OurRecData = new Text(apple.conclusion()), NewsData = new Text("(EH)");
-		PCData.setStyle(PageTextStyle);
-		ThreeMRData.setStyle(PageTextStyle);
-		PEData.setStyle(PageTextStyle);
-		MMData.setStyle(PageTextStyle);
-		RSIData.setStyle(PageTextStyle);
-		EMAData.setStyle(PageTextStyle);
-		OurRecData.setStyle(PageTextStyle);
-		NewsData.setStyle(PageTextStyle);
-		SubrootData.getChildren().addAll(PCData,ThreeMRData,PEData,MMData,RSIData,EMAData,OurRecData,NewsData);
-		SSroot.setRight(SubrootData);
-		*/
-		
 		root.setCenter(info);
 		root.setTop(top);
-		
 		root.setStyle("-fx-background-color: black");
 		if (TimesinSpecificStockScene == 1)
 			SpecificStockScene = new Scene(root, InitialWidthScreen, InitialHeightScreen);
@@ -1790,8 +1979,10 @@ public class UI extends Application {
 		window.setScene(SpecificStockScene);
 		
 	}
-	
+
+	// Onboards info for Assessment
 	public void LoadIndividualStockAssesmentOnboard() {
+		// Page Styling
 		String BaseButtonStyle ="-fx-text-fill: white;"+
 				"-fx-background-color:transparent;"+
 				"-fx-border-color:white;"+
@@ -1824,17 +2015,19 @@ public class UI extends Application {
 		
 		TimeinIndividualStockAssesmentOnboardScene++;
 		
+		// Formating
 		rootmainScene.setCenter(null);
-		
 		BorderPane root = new BorderPane();
 		VBox top = new VBox(10);
 		top.setAlignment(Pos.CENTER);
 		BorderPane backbtn = new BorderPane();
 		backbtn.setPadding(new Insets(15, 15, 15, 15));
 		
+		// Creates comboboxes
 		ComboBox <String> OutLookSelection = new ComboBox<String>();
 		ComboBox <String> StockNames = new ComboBox<String>();
 		
+		// Creates a back button for the page
 		int BackButtonSizeX = 150,BackButtonSizeY = 45;
 		Button back = new Button("Back");
 		back.setPrefSize(BackButtonSizeX, BackButtonSizeY);
@@ -1844,53 +2037,53 @@ public class UI extends Application {
 		backbtn.setLeft(back);
 		top.getChildren().add(backbtn);
 		
+		// Loads a Header for the Page
 		Text Header = new Text("Load Information");
 		Header.setStyle(HeaderTextStyle);
 		top.getChildren().add(Header);
 		
+		// Formating for the page
 		VBox elements = new VBox(20);
 		elements.setAlignment(Pos.CENTER);
 		HBox textinput = new HBox(50);
 		VBox text = new VBox(30);
 		VBox input = new VBox(30);
 
+		// Text for page
 		Text OL = new Text("Outlook: "), STOCK = new Text("Stock Name: ");
 		OL.setStyle(BodyTextStyle);
 		STOCK.setStyle(BodyTextStyle);
 		text.getChildren().addAll(OL,STOCK);
-		
 		textinput.getChildren().add(text);
 	
-		// Add all of the possibilities
-		OutLookSelection.getItems().addAll("3 Days", "1 Week", "1 Month", "3 Months");
+		// Outlook Selection Screen
+		OutLookSelection.getItems().addAll("3 Days", "1 Week", "1 Month");
 		OutLookSelection.setValue("3 Days");
 		input.getChildren().add(OutLookSelection);
 	
-		String[] SN = null;
-		try {
-			SN = OpenFile("TopUSCompanies.txt");
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+		// Populates stock searcher
+		StockDatabase data = new StockDatabase();
 		StockNames.setTooltip(new Tooltip());
-		StockNames.getItems().addAll(SN);
+		StockNames.getItems().addAll(data.getAllStockNames());
 		new ComboBoxSearcher<String>(StockNames);
+		StockNames.getSelectionModel().selectFirst();
 		input.getChildren().add(StockNames);
-		StockNames.setValue("Apple");
 		
+		// Formating
 		textinput.getChildren().add(input);
 		textinput.setAlignment(Pos.CENTER);
 		elements.getChildren().add(textinput);
 
+		// Search Button
 		int SearchButtonSizeX = 150, SearchButtonSizeY = 45;
-		Button search = new Button("Do Yo thang");
+		Button search = new Button("Assess");
 		search.setPrefSize(SearchButtonSizeX, SearchButtonSizeY);
 		search.setStyle(BaseButtonStyle);
 		HoverListener(search,BaseButtonStyle,HoverButtonStyle);
 		search.setOnAction(e -> LoadIndividualStockAssesment(OutLookSelection.getValue(),StockNames.getValue()));
 		elements.getChildren().add(search);
 		
+		// Formating
 		root.setTop(top);
 		root.setCenter(elements);
 		root.setStyle("-fx-background-color: black");
@@ -1905,6 +2098,10 @@ public class UI extends Application {
 	
 	public void LoadIndividualStockAssesment(String Outlook, String Name){	
 		
+		StockAnalysis calc = new StockAnalysis(Name,Outlook);
+		MetricCalculator calc1 = new MetricCalculator(Name,Outlook);
+		
+		// Page Styling
 		String BaseButtonStyle ="-fx-text-fill: white;"+
 				"-fx-background-color:transparent;"+
 				"-fx-border-color:white;"+
@@ -1924,6 +2121,25 @@ public class UI extends Application {
 			    "-fx-border-radius: 18;"+
 			    "-fx-font-size: 15;";
 		
+		String BackButtonStyle ="-fx-text-fill: white;"+
+				"-fx-background-color:transparent;"+
+				"-fx-border-color:white;"+
+			    "-fx-font: Courier New;"+
+			    "-fx-font-family: Courier New;"+
+			    "-fx-font-weight: bold;"+
+			    "-fx-border-radius: 18;"+
+			    "-fx-font-size: 22;"+
+			    "-fx-vertical-align:middle;";
+		
+		String HoverBackButtonStyle = "-fx-text-fill: grey;"+
+			    "-fx-background-color: transparent;"+
+			    "-fx-font: Courier New;"+
+			    "-fx-border-color: grey;"+
+			    "-fx-font-family: Courier New;"+
+			    "-fx-font-weight: bold;"+
+			    "-fx-border-radius: 18;"+
+			    "-fx-font-size: 22;";
+		
 		String HeaderTextStyle = "-fx-font: Times New Roman;"+
 				"-fx-fill: white;"+
 			    "-fx-font-family: Courier New;"+
@@ -1936,64 +2152,68 @@ public class UI extends Application {
 			    "-fx-font-weight: bold;"+
 			    "-fx-font-size: 10;";
 		
-		String TextFieldStyle = "-fx-font-family: Quicksand;"+
-				"-fx-font-size: 18;"+
-				"-fx-padding: 1,1,1,1;"+
-				"-fx-border-color: white;"+
-				"-fx-border-width: 2;"+
-				"-fx-border-radius: 1;"+
-				"-fx-border: white;"+
-				"-fx-background-color: transparent;"+
-				"-fx-text-fill: white;";
+		String populateTextStyle = "-fx-font: Times New Roman;"+
+				"-fx-fill: white;"+
+			    "-fx-font-family: Courier New;"+
+			    "-fx-font-weight: bold;"+
+			    "-fx-font-size: 25;";
 		
 		TimesinIndividualStockAssesmentScene++;
 		
+		// Formatting
 		rootmainScene.setCenter(null);
-		
 		BorderPane root = new BorderPane();
 		BorderPane backbtn = new BorderPane();
 		backbtn.setPadding(new Insets(15,15,15,15));
 		VBox top = new VBox();
 		top.setAlignment(Pos.CENTER);
+		
+		// Creating a back Button
 		int BackButtonSizeX = 150,BackButtonSizeY = 45;
 		Button back = new Button("Back");
 		back.setPrefSize(BackButtonSizeX, BackButtonSizeY);
-		back.setStyle(BaseButtonStyle);
-		HoverListener(back,BaseButtonStyle,HoverButtonStyle);
+		back.setStyle(BackButtonStyle);
+		HoverListener(back,BackButtonStyle,HoverBackButtonStyle);
 		back.setOnAction(e -> LoadIndividualStockAssesmentOnboard());
 		backbtn.setLeft(back);
 		top.getChildren().add(backbtn);
 		
+		// Creating a header
 		Text Header = new Text(Name+"'s Stock Assesment");
 		Header.setStyle(HeaderTextStyle);
 		top.getChildren().add(Header);
 		
 		root.setTop(top);
 		
-		Text arrow1 = new Text("-->"), arrow2 = new Text("-->"), arrow3 = new Text("-->"), arrow4 = new Text("-->"),  arrow5 = new Text("-->"), arrow6 = new Text("-->");
-		arrow1.setStyle(PageTextStyle);
+		// Creating arrows for in between buttons
+		Text arrow2 = new Text("-->"), arrow3 = new Text("-->"), arrow4 = new Text("-->"),  arrow5 = new Text("-->"), arrow6 = new Text("-->");
 		arrow2.setStyle(PageTextStyle);
 		arrow3.setStyle(PageTextStyle);
 		arrow4.setStyle(PageTextStyle);
 		arrow5.setStyle(PageTextStyle);
 		arrow6.setStyle(PageTextStyle);
 		
-		int textfieldSizeX = 300,textfieldSizeY = 300;
-		TextField populate = new TextField();
-		populate.setPrefSize(textfieldSizeX,textfieldSizeY);
-		populate.setText("Introduction");
-		populate.setStyle(TextFieldStyle);
+		// Creating Buttons and text to populate underneath
+		Text populate = new Text();
+		Text Definitions = new Text();
+		Text CurrentMetric = new Text();
+		populate.wrappingWidthProperty().bind(window.widthProperty());
+		Definitions.wrappingWidthProperty().bind(window.widthProperty());
+		CurrentMetric.wrappingWidthProperty().bind(window.widthProperty());
+		populate.setText(calc.getIntroduction());
+		populate.setStyle(populateTextStyle);
+		CurrentMetric.setStyle(populateTextStyle);
+		Definitions.setStyle(populateTextStyle);
 		VBox center = new VBox(20);
 		center.setAlignment(Pos.CENTER);
         HBox btns = new HBox(0);
         int LearningButtonSizeX = 150,LearningButtonSizeY = 45;
-        Button PCBTN = new Button("Previous \nClose"), ThreeMRBTN = new Button("Three Month \nRange"), PEBTN = new Button("Price to \nEarnings Ratio"), MMBTN = new Button("Market \nMomentum"), RSIBTN = new Button("Relative \nStrength Index"), EMABTN = new Button("Exponential \nMoving Average"), OurRecBTN = new Button("Our \nReccomendation");
-        Button btnarr[] = {PCBTN,ThreeMRBTN,PEBTN,MMBTN,RSIBTN,EMABTN,OurRecBTN};
+        Button PCBTN = new Button("Previous \nClose"), PEBTN = new Button("Price to \nEarnings Ratio"), MMBTN = new Button("Market \nMomentum"), RSIBTN = new Button("Relative \nStrength Index"), EMABTN = new Button("Exponential \nMoving Average"), OurRecBTN = new Button("Our \nReccomendation");
+        Button btnarr[] = {PCBTN,PEBTN,MMBTN,RSIBTN,EMABTN,OurRecBTN};
         
+        // Styling the buttons and sizing them
         PCBTN.setPrefSize(LearningButtonSizeX, LearningButtonSizeY);
         PCBTN.setStyle(BaseButtonStyle);
-        ThreeMRBTN.setPrefSize(LearningButtonSizeX, LearningButtonSizeY);
-        ThreeMRBTN.setStyle(BaseButtonStyle);
         PEBTN.setPrefSize(LearningButtonSizeX, LearningButtonSizeY);
         PEBTN.setStyle(BaseButtonStyle);
         MMBTN.setPrefSize(LearningButtonSizeX, LearningButtonSizeY);
@@ -2004,20 +2224,22 @@ public class UI extends Application {
         EMABTN.setStyle(BaseButtonStyle);
         OurRecBTN.setPrefSize(LearningButtonSizeX, LearningButtonSizeY);
         OurRecBTN.setStyle(BaseButtonStyle);
-        btns.getChildren().addAll(PCBTN,arrow1,ThreeMRBTN,arrow2,PEBTN,arrow3,MMBTN,arrow4,RSIBTN,arrow5,EMABTN,arrow6,OurRecBTN);
+        btns.getChildren().addAll(PCBTN,arrow2,PEBTN,arrow3,MMBTN,arrow4,RSIBTN,arrow5,EMABTN,arrow6,OurRecBTN);
         btns.setAlignment(Pos.CENTER);
-        center.getChildren().addAll(btns,populate);
+        center.getChildren().addAll(btns,Definitions,CurrentMetric,populate);
+        center.setPadding(new Insets(15,15,15,15));
         
+        // Creates a learning button
         int LearningButtonSizex = 300,LearningButtonSizey = 75;
         Button learningButton = new Button("Click to Learn");
         learningButton.setPrefSize(LearningButtonSizex,LearningButtonSizey);
         learningButton.setStyle(BaseButtonStyle);
         HoverListener(learningButton,BaseButtonStyle,HoverButtonStyle);
-        learningButton.setOnAction(e -> PC(learningButton, btnarr, populate));
+        learningButton.setOnAction(e -> PC(learningButton, btnarr,CurrentMetric,Definitions, populate,calc,calc1));
         center.getChildren().add(learningButton);
         
+        // formating
         root.setCenter(center);
-		
 		root.setStyle("-fx-background-color: black");
 		if (TimesinIndividualStockAssesmentScene == 1)
 			IndividualStockAssesmentScene = new Scene(root, InitialWidthScreen, InitialHeightScreen);
@@ -2026,8 +2248,10 @@ public class UI extends Application {
 		
 		window.setScene(IndividualStockAssesmentScene);
 	}	
-	
-	public void PC(Button learningButton, Button btnarr[], TextField populate) {
+
+	// Updates Load Individual Stock Assessment
+	public void PC(Button learningButton, Button btnarr[],Text CurrentMetric, Text Definitions, Text populate,StockAnalysis calc, MetricCalculator calc1) {
+		// Style
 		String SelectedButtonStyle ="-fx-text-fill: yellow;"+
 				"-fx-background-color:transparent;"+
 				"-fx-border-color:yellow;"+
@@ -2035,24 +2259,20 @@ public class UI extends Application {
 			    "-fx-font-family: Courier New;"+
 			    "-fx-font-weight: bold;"+
 			    "-fx-border-radius: 18;"+
-			    "-fx-font-size: 15;";
+			    "-fx-font-size: 15;";	
 		
-		String BaseButtonStyle ="-fx-text-fill: white;"+
-				"-fx-background-color:transparent;"+
-				"-fx-border-color:white;"+
-			    "-fx-font: Courier New;"+
-			    "-fx-font-family: Courier New;"+
-			    "-fx-font-weight: bold;"+
-			    "-fx-border-radius: 18;"+
-			    "-fx-font-size: 15;";
-		
-		
+		// Updates page
+		DecimalFormat df = new DecimalFormat("###.###");
+		Definitions.setText("Definition: "+ calc1.getPriceDefinition());
+		CurrentMetric.setText("Price: "+df.format(calc1.getPrevClose()));
+		populate.setText("Analysis: "+calc.getPrice());
 		btnarr[0].setStyle(SelectedButtonStyle);
-		populate.setText("PC");
-		learningButton.setOnAction(e -> ThreeMR(learningButton,btnarr,populate));
-	}
-	
-	public void ThreeMR (Button learningButton, Button btnarr[], TextField populate) {
+		learningButton.setOnAction(e -> PE(learningButton,btnarr,CurrentMetric,Definitions,populate,calc,calc1));
+	}	
+
+	// Updates Load Individual Stock Assessment
+	public void PE(Button learningButton, Button btnarr[],Text CurrentMetric, Text Definitions, Text populate,StockAnalysis calc, MetricCalculator calc1) {
+		// Styling
 		String SelectedButtonStyle ="-fx-text-fill: yellow;"+
 				"-fx-background-color:transparent;"+
 				"-fx-border-color:yellow;"+
@@ -2071,13 +2291,19 @@ public class UI extends Application {
 			    "-fx-border-radius: 18;"+
 			    "-fx-font-size: 15;";
 		
+		// Updates Page
+		DecimalFormat df = new DecimalFormat("###.###");
+		Definitions.setText("Definition: "+ calc1.getPERatioDefinition());
+		CurrentMetric.setText("P/E: "+df.format(calc1.getPERatio()));
+		populate.setText("Analysis: "+calc.getPERatio());
 		btnarr[0].setStyle(BaseButtonStyle);
 		btnarr[1].setStyle(SelectedButtonStyle);
-		populate.setText("ThreeMR");
-		learningButton.setOnAction(e -> PE(learningButton,btnarr,populate));
+		learningButton.setOnAction(e -> MM(learningButton,btnarr,CurrentMetric,Definitions,populate,calc,calc1));
 	}
 	
-	public void PE(Button learningButton, Button btnarr[], TextField populate) {
+	// Updates Load Individual Stock Assessment
+	public void MM(Button learningButton, Button btnarr[],Text CurrentMetric, Text Definitions,Text populate,StockAnalysis calc, MetricCalculator calc1) {
+		// Styling 
 		String SelectedButtonStyle ="-fx-text-fill: yellow;"+
 				"-fx-background-color:transparent;"+
 				"-fx-border-color:yellow;"+
@@ -2096,13 +2322,19 @@ public class UI extends Application {
 			    "-fx-border-radius: 18;"+
 			    "-fx-font-size: 15;";
 		
+		// Updates Page
+		DecimalFormat df = new DecimalFormat("###.###");
+		Definitions.setText("Definition: "+ calc1.getMomentumDefinition());
+		CurrentMetric.setText("Market Momentum: "+df.format(calc1.numOutlook(calc1.getOutlook())));
+		populate.setText("Analysis: "+calc.getMomentum());
 		btnarr[1].setStyle(BaseButtonStyle);
 		btnarr[2].setStyle(SelectedButtonStyle);
-		populate.setText("PE");
-		learningButton.setOnAction(e -> MM(learningButton,btnarr,populate));
+		learningButton.setOnAction(e -> RSI(learningButton,btnarr,CurrentMetric,Definitions,populate,calc,calc1));
 	}
 	
-	public void MM(Button learningButton, Button btnarr[], TextField populate) {
+	// Updates Load Individual Stock Assessment
+	public void RSI(Button learningButton, Button btnarr[],Text CurrentMetric, Text Definitions, Text populate,StockAnalysis calc, MetricCalculator calc1) {
+		// Styling 
 		String SelectedButtonStyle ="-fx-text-fill: yellow;"+
 				"-fx-background-color:transparent;"+
 				"-fx-border-color:yellow;"+
@@ -2121,13 +2353,19 @@ public class UI extends Application {
 			    "-fx-border-radius: 18;"+
 			    "-fx-font-size: 15;";
 		
+		// Updates Page
+		DecimalFormat df = new DecimalFormat("###.###");
+		Definitions.setText("Definition: "+ calc1.getRSIDefinition());
+		CurrentMetric.setText("RSI: "+df.format(calc1.getRSI()));
+		populate.setText("Analysis: "+calc.getRSI());
 		btnarr[2].setStyle(BaseButtonStyle);
 		btnarr[3].setStyle(SelectedButtonStyle);
-		populate.setText("MM");
-		learningButton.setOnAction(e -> RSI(learningButton,btnarr,populate));
+		learningButton.setOnAction(e -> EMA(learningButton,btnarr,CurrentMetric,Definitions,populate,calc,calc1));
 	}
 	
-	public void RSI(Button learningButton, Button btnarr[], TextField populate) {
+	// Updates Load Individual Stock Assessment
+	public void EMA(Button learningButton, Button btnarr[], Text CurrentMetric, Text Definitions,Text populate,StockAnalysis calc, MetricCalculator calc1) {
+		// Styling 
 		String SelectedButtonStyle ="-fx-text-fill: yellow;"+
 				"-fx-background-color:transparent;"+
 				"-fx-border-color:yellow;"+
@@ -2146,13 +2384,20 @@ public class UI extends Application {
 			    "-fx-border-radius: 18;"+
 			    "-fx-font-size: 15;";
 		
+		// Updates Page
+		DecimalFormat df = new DecimalFormat("###.###");
+		Definitions.setText("Definition: "+ calc1.getEMADefinition());
+		CurrentMetric.setText("EMA: "+df.format(calc1.getEMA(calc1.getOutlook())));
+		populate.setText("Analysis: "+calc.getEMA());
 		btnarr[3].setStyle(BaseButtonStyle);
 		btnarr[4].setStyle(SelectedButtonStyle);
-		populate.setText("RSI");
-		learningButton.setOnAction(e -> EMA(learningButton,btnarr,populate));
+		learningButton.setOnAction(e -> Conc(learningButton,btnarr,CurrentMetric,Definitions,populate,calc,calc1));
 	}
 	
-	public void EMA(Button learningButton, Button btnarr[], TextField populate) {
+	// Updates Load Individual Stock Assessment
+	public void Conc(Button learningButton, Button btnarr[],Text CurrentMetric, Text Definitions, Text populate,StockAnalysis calc, MetricCalculator calc1) {
+		
+		// Styling
 		String SelectedButtonStyle ="-fx-text-fill: yellow;"+
 				"-fx-background-color:transparent;"+
 				"-fx-border-color:yellow;"+
@@ -2170,38 +2415,17 @@ public class UI extends Application {
 			    "-fx-font-weight: bold;"+
 			    "-fx-border-radius: 18;"+
 			    "-fx-font-size: 15;";
-		
+
+		// Updates Page
+		Definitions.setText("");
+		CurrentMetric.setText("");
+		populate.setText("Analysis: "+calc.conclusion());
 		btnarr[4].setStyle(BaseButtonStyle);
 		btnarr[5].setStyle(SelectedButtonStyle);
-		populate.setText("EMA");
-		learningButton.setOnAction(e -> Conc(learningButton,btnarr,populate));
+		learningButton.setOnAction(e -> LoadIndividualStockAssesmentOnboard());
 	}
 	
-	public void Conc(Button learningButton, Button btnarr[], TextField populate) {
-		
-		String SelectedButtonStyle ="-fx-text-fill: yellow;"+
-				"-fx-background-color:transparent;"+
-				"-fx-border-color:yellow;"+
-			    "-fx-font: Courier New;"+
-			    "-fx-font-family: Courier New;"+
-			    "-fx-font-weight: bold;"+
-			    "-fx-border-radius: 18;"+
-			    "-fx-font-size: 15;";
-		
-		String BaseButtonStyle ="-fx-text-fill: white;"+
-				"-fx-background-color:transparent;"+
-				"-fx-border-color:white;"+
-			    "-fx-font: Courier New;"+
-			    "-fx-font-family: Courier New;"+
-			    "-fx-font-weight: bold;"+
-			    "-fx-border-radius: 18;"+
-			    "-fx-font-size: 15;";
-		
-		btnarr[5].setStyle(BaseButtonStyle);
-		btnarr[6].setStyle(SelectedButtonStyle);
-		populate.setText("Conclusion");
-	}
-	
+	// Creates a way for the buttons to seem like they are being hovered over
 	public void HoverListener(Button button, String BaseStyle, String HoverStyle) {
 		button.hoverProperty().addListener((observable, oldValue, newValue) -> {
 			if (newValue) {
@@ -2212,6 +2436,7 @@ public class UI extends Application {
 		});
 	}
 
+	// For the combo box searcher
 	public static class HideableItem<T>
     {
         private final ObjectProperty<T> object = new SimpleObjectProperty<>();
@@ -2237,17 +2462,4 @@ public class UI extends Application {
         }
     }
 	
-	public String[] OpenFile(String file) throws IOException{
-		FileReader fr = new FileReader(file);
-		BufferedReader textReader = new BufferedReader(fr);
-		
-		int numLines = 84;
-		String[] text = new String[numLines];
-		
-		for (int i = 0; i < numLines; i++) {
-			text[i] = textReader.readLine();
-		}
-		
-		return text;
-	}
 }
