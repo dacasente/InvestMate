@@ -62,5 +62,26 @@ public class StockImporterTest extends TestCase {
     assertTrue(StockImporter.getStockCurrency("Microsoft").equals("USD"));
     assertTrue(StockImporter.getStockCurrency("This shouldn't work, it should return null") == null);
   }
+  
+  public void testGetTimeSeries(){
+    assertTrue(StockImporter.timeSeriesDaily("AAPL") != null);
+    assertTrue(StockImporter.timeSeriesWeekly("AAPL") != null);
+    assertTrue(StockImporter.timeSeriesMonthly("AAPL") != null);
+  }
+  public void testGetLastClose(){
+    assertTrue(StockImporter.getLastDayClose("AAPL") instanceof Float);
+  }
+  
+  public void testGetSectorInfo(){
+    assertTrue(StockImporter.getSectorInfo() instanceof Object[]);
+    assertTrue(StockImporter.getSectorInfo()[0] instanceof ArrayList);
+  }
+  
+  public void testStockLive(){
+    assertTrue(StockImporter.isStockLive("AAPL"));
+    assertFalse(StockImporter.isStockLive("This stock won't be live"));
+  }
+  
+  
 }
   

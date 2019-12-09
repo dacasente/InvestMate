@@ -374,7 +374,7 @@ public class StockImporter {
  }
   
   public static Object[] getSectorInfo(){
-    
+    //Returns an array of arraylists of information about different sectors
     ArrayList<Float> energy = new ArrayList<Float>();
     ArrayList<Float> financials = new ArrayList<Float>();
     ArrayList<Float> healthcare = new ArrayList<Float>();
