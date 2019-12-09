@@ -183,16 +183,10 @@ public class StockImporter {
    } 
  }
  
- public static Object[] timeSeriesDaily(String symbol){
+ public static ArrayList<Float> timeSeriesDaily(String symbol){
    //Using a StringBuilder...
    StringBuilder urlBuilder = new StringBuilder();
-   
-   ArrayList<String> date = new ArrayList<String>();
-   ArrayList<Float> open = new ArrayList<Float>();
-   ArrayList<Float> high = new ArrayList<Float>();
-   ArrayList<Float> low = new ArrayList<Float>();
    ArrayList<Float> close = new ArrayList<Float>();
-   ArrayList<Float> volume = new ArrayList<Float>();
    
   //We specify our url...
   urlBuilder.append("https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=");
@@ -210,30 +204,26 @@ public class StockImporter {
    buff.readLine();
    String line = buff.readLine();
    int i  = 0;
-   while (line != null){
+   while (line != null && i < 365){
     String [] data = line.split(",");
-    date.add(data[0]);
-    open.add(Float.parseFloat(data[1]));
-    high.add(Float.parseFloat(data[2]));
-    low.add(Float.parseFloat(data[3]));
     close.add(Float.parseFloat(data[4]));
-    volume.add(Float.parseFloat(data[5]));
     line = buff.readLine();
+    i++;
    }
-   return new Object[]{date, open, high, low, close, volume};
+   return close;
   }
 
   catch (MalformedURLException mu){
    System.out.println(mu.getMessage());
-   return null;
+   return new ArrayList<Float>();
   }
   catch (IOException io){
    System.out.println(io.getMessage());
-   return null;
+   return new ArrayList<Float>();
   }
   catch(ArrayIndexOutOfBoundsException ae){
    System.out.println("INVALID STOCK SYMBOL");
-   return null;
+   return new ArrayList<Float>();
   }
  }
  

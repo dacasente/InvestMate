@@ -3,41 +3,45 @@
   <project autorefresh="false" main="" root="" work="">
     <createjar file=""/>
     <source>
-      <file active="true" name="StockImporter.java" package="" timestamp="06-Dec-2019 18:59:18">
-        <select from="16653" to="16653"/>
-        <scroll column="7135" row="1665"/>
+      <file active="true" name="Stock.java" package="" timestamp="28-Oct-2019 23:11:14">
+        <select from="0" to="0"/>
+        <scroll column="0" row="0"/>
       </file>
       <file name="OwnedStock.java" package="" timestamp="29-Oct-2019 01:01:11">
-        <select from="16653" to="16653"/>
-        <scroll column="7135" row="1665"/>
+        <select from="0" to="0"/>
+        <scroll column="0" row="0"/>
       </file>
       <file name="Portfolio.java" package="" timestamp="29-Oct-2019 01:02:33">
-        <select from="16653" to="16653"/>
-        <scroll column="7135" row="1665"/>
-      </file>
-      <file name="Stock.java" package="" timestamp="28-Oct-2019 23:11:14">
-        <select from="16653" to="16653"/>
-        <scroll column="7135" row="1665"/>
+        <select from="0" to="0"/>
+        <scroll column="0" row="0"/>
       </file>
       <file name="StockImporterTest.java" package="" timestamp="29-Nov-2019 17:54:58">
-        <select from="16653" to="16653"/>
-        <scroll column="7135" row="1665"/>
+        <select from="0" to="0"/>
+        <scroll column="0" row="0"/>
       </file>
       <file name="StockPriceEntry.java" package="" timestamp="28-Oct-2019 23:11:14">
-        <select from="16653" to="16653"/>
-        <scroll column="7135" row="1665"/>
+        <select from="0" to="0"/>
+        <scroll column="0" row="0"/>
       </file>
       <file name="User.java" package="" timestamp="05-Dec-2019 01:06:23">
-        <select from="16653" to="16653"/>
-        <scroll column="7135" row="1665"/>
+        <select from="0" to="0"/>
+        <scroll column="0" row="0"/>
       </file>
       <file name="UserInterface.java" package="" timestamp="28-Oct-2019 23:11:14">
-        <select from="16653" to="16653"/>
-        <scroll column="7135" row="1665"/>
+        <select from="0" to="0"/>
+        <scroll column="0" row="0"/>
       </file>
       <file name="UserManager.java" package="" timestamp="05-Dec-2019 19:30:47">
-        <select from="16653" to="16653"/>
-        <scroll column="7135" row="1665"/>
+        <select from="0" to="0"/>
+        <scroll column="0" row="0"/>
+      </file>
+      <file name="StockImporter.java" package="" timestamp="07-Dec-2019 20:06:47">
+        <select from="0" to="0"/>
+        <scroll column="0" row="0"/>
+      </file>
+      <file name="DatabasePopulator.java" package="" timestamp="08-Dec-2019 21:55:07">
+        <select from="0" to="0"/>
+        <scroll column="0" row="0"/>
       </file>
     </source>
     <included/>
@@ -46,7 +50,9 @@
     <classpath>
       <file absolute="false" name="java-json.jar"/>
     </classpath>
-    <breakpoints/>
+    <breakpoints>
+      <breakpoint enabled="true" file="DatabasePopulator.java" line="15"/>
+    </breakpoints>
     <watches/>
     <bookmarks/>
     <preferences/>
